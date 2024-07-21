@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/border_input"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/dialog_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/poppy"
+        android:text="Setup Alert"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingBottom="8dp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:background="@color/black"
+        android:layout_height="1dp"/>
+
+    <EditText
+        android:layout_marginVertical="10dp"
+        android:id="@+id/dialog_note"
+        android:layout_width="match_parent"
+        android:textColorHint="@color/suunyg"
+        android:textSize="18sp"
+        android:padding="4dp"
+        android:textCursorDrawable="@color/white"
+        android:cursorVisible="true"
+        android:background="@drawable/custom_style"
+        android:minHeight="26sp"
+        android:textColor="@color/poppy"
+        android:layout_height="35dp"
+        android:hint="Add a note ..."
+        android:inputType="text"/>
+
+    <LinearLayout
+        android:layout_marginVertical="5dp"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:background="@color/black"
+        android:layout_height="1dp"/>
+    <EditText
+        android:layout_marginVertical="10dp"
+        android:id="@+id/dialog_input"
+        android:layout_width="match_parent"
+        android:padding="4dp"
+        android:textColorHint="@color/suunyg"
+        android:textCursorDrawable="@drawable/cursor_white"
+        android:cursorVisible="true"
+        android:textColor="@color/poppy"
+        android:background="@drawable/custom_style"
+        android:minHeight="26sp"
+        android:textSize="18sp"
+        android:layout_height="35dp"
+        android:hint="price level ...."
+        android:inputType="numberDecimal"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_marginVertical="5dp"
+        android:background="@color/black"
+        android:layout_height="1dp"/>
+
+    <RadioGroup
+        android:id="@+id/dir"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="10dp"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/bull"
+            android:layout_width="wrap_content"
+            android:textSize="13sp"
+            android:buttonTint="@color/uclag"
+            android:layout_height="wrap_content"
+            android:textColor="@color/uclag"
+            android:text="above" />
+
+        <RadioButton
+            android:id="@+id/bear"
+            android:layout_width="wrap_content"
+            android:textSize="13sp"
+            android:checked="true"
+
+            android:buttonTint="@color/uclag"
+            android:layout_height="wrap_content"
+            android:textColor="@color/uclag"
+            android:text="below" />
+    </RadioGroup>
+
+    <!-- Add custom buttons for Positive and Negative actions -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:paddingTop="5dp">
+
+        <Button
+            android:id="@+id/button_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:textColor="@color/uclag"/>
+
+        <Button
+            android:id="@+id/button_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="OK"
+            android:textColor="@color/uclag"/>
+
+    </LinearLayout>
+</LinearLayout>

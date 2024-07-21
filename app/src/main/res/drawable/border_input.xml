@@ -1,0 +1,23 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Rounded corners shape with transparent background to clip the image -->
+    <item android:left="3dp" android:right="3dp" android:top="3dp" android:bottom="3dp">
+        <shape>
+            <solid android:color="@color/uclag_back" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+
+
+    <!-- Stroke and rounded corners overlay -->
+    <item>
+        <shape>
+            <solid android:color="@android:color/black" />
+            <stroke
+                android:width="2dp"
+                android:color="@color/uclag_back" />
+            <corners
+                android:radius="8dp" />
+        </shape>
+    </item>
+</layer-list>
