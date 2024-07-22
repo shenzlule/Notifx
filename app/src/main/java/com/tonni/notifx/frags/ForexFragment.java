@@ -21,9 +21,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.tonni.notifx.MainActivity;
 import com.tonni.notifx.R;
-import com.tonni.notifx.Utils.StorageUtils;
+import com.tonni.notifx.Utils.Storage.StorageUtils;
 import com.tonni.notifx.adapter.ForexCurrencyAdapter;
 import com.tonni.notifx.Utils.SwipeToRevealCallback;
 import com.tonni.notifx.inter.MainActivityInterface;
@@ -71,21 +70,7 @@ public class ForexFragment extends Fragment implements RefreshableFragment {
 
         adapter = new ForexCurrencyAdapter(forexCurrencyList,this,pendingPrices);
         recyclerView.setAdapter(adapter);
-//        swipeToRevealCallback=new SwipeToRevealCallback(adapter,this,);
-
-//        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToRevealCallback);
-//        itemTouchHelper.attachToRecyclerView(recyclerView);
-
-//        // Example JSON data
-//        String jsonData = "{\"currency\":\"USD\",\"rate\":1.25}";
 //
-//        // Write JSON data to internal storage
-//        StorageUtils.writeJsonToFile(requireContext(), FILE_NAME, jsonData);
-
-        // Read JSON data from internal storage
-        String readJsonData = StorageUtils.readJsonFromFile(requireContext(), FILE_NAME);
-//        Toast.makeText(getContext(), String.valueOf("ForexFragment"+" Read JSON: " + readJsonData), Toast.LENGTH_SHORT).show();
-
         return view;
     }
 
@@ -154,13 +139,14 @@ public class ForexFragment extends Fragment implements RefreshableFragment {
                 price_input.setText(formattedPriceInput);
 
                 String pair_=forexCurrency.getBaseCurrency()  + forexCurrency.getQuoteCurrency();
+                String pair_v=forexCurrency.getBaseCurrency() +"/" + forexCurrency.getQuoteCurrency();
                 if (forexCurrency.getQuoteCurrency().equals("@")){
                     pair_=forexCurrency.getBaseCurrency();
                 }
                 Calendar calendar = Calendar.getInstance();
                 addNewPending(position, formattedPriceInput, notesInputText,
                         pair_,
-                        String.valueOf(calendar.getTimeInMillis()),dirText);
+                        String.valueOf(calendar.getTimeInMillis()),dirText,pair_v);
                 Toast.makeText(getContext(), "Input: " + formattedPriceInput+dirText +" "+notes_input.getText().toString(), Toast.LENGTH_SHORT).show();
 
             } catch (NumberFormatException e) {
@@ -193,8 +179,8 @@ public class ForexFragment extends Fragment implements RefreshableFragment {
         }
     }
 
-    private void addNewPending(int position ,String price , String note,String pair,String date,String dir){
-        pendingPrices.add(new PendingPrice(price,pair,date,note,"Not","Null",dir));
+    private void addNewPending(int position ,String price , String note,String pair,String date,String dir,String visible_lable){
+        pendingPrices.add(new PendingPrice(price,pair,visible_lable,date,note,"Not","Null",dir));
         adapter.notifyItemChanged(position);
         Gson gson = new Gson();
         List<PendingPrice> pendingPricesClear=new ArrayList<>();

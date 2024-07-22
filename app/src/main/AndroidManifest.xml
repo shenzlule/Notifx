@@ -47,11 +47,11 @@
         </activity>
 
 
-        <receiver android:name=".Utils.NotifyReceiver" />
-        <receiver android:name=".Utils.AlarmReceiver" />
-        <receiver android:name=".Utils.NotificationActionReceiver" />
+        <receiver android:name=".Utils.receivers.NotifyReceiver" />
+        <receiver android:name=".Utils.receivers.AlarmReceiver" />
+        <receiver android:name=".Utils.receivers.NotificationActionReceiver" />
 
-        <receiver android:name=".Utils.BootReceiver"
+        <receiver android:name=".Utils.receivers.BootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

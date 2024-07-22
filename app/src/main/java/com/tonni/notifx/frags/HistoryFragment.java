@@ -1,20 +1,12 @@
 package com.tonni.notifx.frags;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,9 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.tonni.notifx.R;
-import com.tonni.notifx.Utils.StorageUtils;
+import com.tonni.notifx.Utils.Storage.StorageUtils;
 import com.tonni.notifx.Utils.SwipeToRevealCallback;
-import com.tonni.notifx.adapter.ForexCurrencyAdapter;
 import com.tonni.notifx.adapter.HistoryAdapter;
 import com.tonni.notifx.inter.MainActivityInterface;
 import com.tonni.notifx.inter.RefreshableFragment;
@@ -33,7 +24,6 @@ import com.tonni.notifx.models.PendingPrice;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 public class HistoryFragment extends Fragment implements RefreshableFragment {
@@ -110,19 +100,7 @@ public class HistoryFragment extends Fragment implements RefreshableFragment {
         }
     }
 
-    private void addNewPending(int position ,String price , String note,String pair,String date,String dir){
-        pendingPrices.add(new PendingPrice(price,pair,date,note,"Not","Null",dir));
-        adapter.notifyItemChanged(position);
-        Gson gson = new Gson();
-        List<PendingPrice> pendingPricesClear=new ArrayList<>();
-        String jsonData_ = gson.toJson(pendingPricesClear);
-        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING, jsonData_);
 
-//        forexNewsItems=null;
-        String jsonData = gson.toJson(pendingPrices);
-        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING, jsonData);
-
-    }
 
     @Override
     public void refresh() {

@@ -1,10 +1,11 @@
-package com.tonni.notifx.Utils;
+package com.tonni.notifx.models;
 
 public class TrackRefresh {
 
     private static int NewsFrag=0;
     private static int PendingFrag=0;
     private static int FilledFrag=0;
+
 
 
     public static int getNewsFrag() {

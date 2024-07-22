@@ -1,4 +1,4 @@
-package com.tonni.notifx.Utils;
+package com.tonni.notifx.Utils.workers;
 
 
 import android.app.Notification;
@@ -13,6 +13,7 @@ import androidx.work.WorkerParameters;
 import com.tonni.notifx.R;
 
 public class NotifyWorker extends Worker {
+    private static final int MAX_PRIORITY = 9;
 
     public NotifyWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -23,16 +24,17 @@ public class NotifyWorker extends Worker {
     public Result doWork() {
         // Create notification
         NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        String channelId = "notify_30_min";
-        String channelName = "30 Minute Notification";
+        String channelId = "notify_20_min";
+        String channelName = "20 Minute Notification";
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(channel);
         }
 
         Notification notification = new NotificationCompat.Builder(getApplicationContext(), channelId)
-                .setContentTitle("Time Check")
-                .setContentText("It's 30 minutes past the hour!")
+                .setContentTitle("Watch list Check")
+                .setContentText("Fetching data...")
+                .setPriority(MAX_PRIORITY)
                 .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
                 .build();
 

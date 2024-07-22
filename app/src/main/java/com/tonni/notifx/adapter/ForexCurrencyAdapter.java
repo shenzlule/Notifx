@@ -1,5 +1,6 @@
 package com.tonni.notifx.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +26,7 @@ public class ForexCurrencyAdapter extends RecyclerView.Adapter<ForexCurrencyAdap
     public ForexCurrencyAdapter(List<ForexCurrency> forexCurrencyList, ForexFragment forexFragment, List<PendingPrice> pendingPrices) {
         this.forexCurrencyList = forexCurrencyList;
         this.forexFragment = forexFragment;
-        this.pendingPrices=pendingPrices;
+        this.pendingPrices = pendingPrices;
     }
 
     @NonNull
@@ -38,9 +39,12 @@ public class ForexCurrencyAdapter extends RecyclerView.Adapter<ForexCurrencyAdap
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ForexCurrency forexCurrency = forexCurrencyList.get(position);
-        int alertTracker=0;
+        int alertTracker = 0;
+
         for (int i = 0; i < pendingPrices.size(); i++) {
-            if (pendingPrices.get(i).getPair().equals(forexCurrency.getBaseCurrency() + "/" + forexCurrency.getQuoteCurrency())){
+            Log.d("MainActivity-Pairs",pendingPrices.get(i).getPair_visible()+"==="+forexCurrency.getBaseCurrency() + "/" + forexCurrency.getQuoteCurrency() );
+
+            if (pendingPrices.get(i).getPair_visible().equals(forexCurrency.getBaseCurrency() + "/" + forexCurrency.getQuoteCurrency())) {
                 alertTracker++;
             }
 
@@ -49,8 +53,8 @@ public class ForexCurrencyAdapter extends RecyclerView.Adapter<ForexCurrencyAdap
         holder.alertNumber.setText(String.valueOf(alertTracker));
         holder.pending_mar.setSelected(true);
 
-        holder.itemView.setOnClickListener(v -> forexFragment.showInputDialog(position,forexCurrency));
-        alertTracker=0;
+        holder.itemView.setOnClickListener(v -> forexFragment.showInputDialog(position, forexCurrency));
+        alertTracker = 0;
     }
 
     @Override
@@ -59,7 +63,7 @@ public class ForexCurrencyAdapter extends RecyclerView.Adapter<ForexCurrencyAdap
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView currencyPair, alertNumber,pending_mar;
+        TextView currencyPair, alertNumber, pending_mar;
         ImageView plusIcon;
 
         public ViewHolder(@NonNull View itemView) {

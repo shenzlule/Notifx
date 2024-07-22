@@ -1,4 +1,4 @@
-package com.tonni.notifx.Utils;
+package com.tonni.notifx.Utils.receivers;
 
 
 import android.app.NotificationChannel;
@@ -8,16 +8,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.os.Handler;
 import android.os.PowerManager;
-import android.os.Vibrator;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
 import com.tonni.notifx.AlarmDetailsActivity;
-import com.tonni.notifx.MainActivity;
 import com.tonni.notifx.R;
+import com.tonni.notifx.Utils.Storage.StorageUtils;
 
 public class AlarmReceiver extends BroadcastReceiver {
 

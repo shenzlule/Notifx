@@ -1,4 +1,4 @@
-package com.tonni.notifx.Utils;
+package com.tonni.notifx.Utils.Storage;
 
 import android.content.Context;
 

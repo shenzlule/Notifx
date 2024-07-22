@@ -3,15 +3,17 @@ package com.tonni.notifx.models;
 public class PendingPrice {
     private  String price;
     private  String pair;
+    private  String pair_visible;
     private   String date;
     private   String note;
     private String filled;
     private   String date_filled;
     private   String direction;
 
-    public PendingPrice(String price, String pair, String date, String note, String filled, String date_filled, String direction) {
+    public PendingPrice(String price, String pair, String pair_visible, String date, String note, String filled, String date_filled, String direction) {
         this.price = price;
         this.pair = pair;
+        this.pair_visible = pair_visible;
         this.date = date;
         this.note = note;
         this.filled = filled;
@@ -73,5 +75,13 @@ public class PendingPrice {
 
     public void setDirection(String direction) {
         this.direction = direction;
+    }
+
+    public String getPair_visible() {
+        return pair_visible;
+    }
+
+    public void setPair_visible(String pair_visible) {
+        this.pair_visible = pair_visible;
     }
 }

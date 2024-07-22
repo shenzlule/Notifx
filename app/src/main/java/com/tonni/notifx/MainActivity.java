@@ -8,36 +8,22 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
-import androidx.work.ExistingPeriodicWorkPolicy;
-import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkManager;
 
 import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-import com.google.gson.Gson;
-import com.tonni.notifx.Utils.AlarmReceiver;
-import com.tonni.notifx.Utils.NotificationScheduler;
-import com.tonni.notifx.api.ApiResponse;
+import com.tonni.notifx.Utils.scheduler.NotificationScheduler;
 import com.tonni.notifx.frags.FilledFragment;
 import com.tonni.notifx.frags.ForexFragment;
 import com.tonni.notifx.frags.HistoryFragment;
@@ -46,12 +32,8 @@ import com.tonni.notifx.frags.PendingFragment;
 import com.tonni.notifx.inter.MainActivityInterface;
 import com.tonni.notifx.inter.RefreshableFragment;
 
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 public class MainActivity extends AppCompatActivity implements MainActivityInterface {

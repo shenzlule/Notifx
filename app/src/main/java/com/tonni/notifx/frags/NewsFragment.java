@@ -1,6 +1,6 @@
 package com.tonni.notifx.frags;
 
-import static com.tonni.notifx.Utils.StorageUtils.writeJsonToFile;
+import static com.tonni.notifx.Utils.Storage.StorageUtils.writeJsonToFile;
 
 import android.Manifest;
 import android.app.Activity;
@@ -16,33 +16,26 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.chaquo.python.PyObject;
-import com.chaquo.python.Python;
 import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken;
-import com.tonni.notifx.MainActivity;
 import com.tonni.notifx.R;
-import com.tonni.notifx.Utils.AlarmReceiver;
+import com.tonni.notifx.Utils.receivers.AlarmReceiver;
 import com.tonni.notifx.Utils.Icmp4a;
-import com.tonni.notifx.Utils.StorageUtils;
+import com.tonni.notifx.Utils.Storage.StorageUtils;
 import com.tonni.notifx.Utils.SwipeToRevealCallback;
-import com.tonni.notifx.Utils.TrackRefresh;
+import com.tonni.notifx.models.TrackRefresh;
 import com.tonni.notifx.adapter.ForexCurrencyAdapter;
 import com.tonni.notifx.adapter.ForexNewsAdapter;
 import com.tonni.notifx.inter.RefreshableFragment;
-import com.tonni.notifx.models.ForexCurrency;
 import com.tonni.notifx.models.ForexNewsItem;
 
 import java.io.IOException;
@@ -54,7 +47,6 @@ import java.util.Calendar;
 import java.util.List;
 
 import com.google.gson.Gson;
-import com.tonni.notifx.models.PendingPrice;
 import com.tonni.notifx.models.WeekNumberModel;
 
 import org.json.JSONArray;

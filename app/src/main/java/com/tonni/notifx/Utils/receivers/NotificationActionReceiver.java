@@ -1,4 +1,4 @@
-package com.tonni.notifx.Utils;
+package com.tonni.notifx.Utils.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

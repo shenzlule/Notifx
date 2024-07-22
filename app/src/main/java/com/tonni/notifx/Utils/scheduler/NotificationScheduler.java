@@ -1,9 +1,11 @@
-package com.tonni.notifx.Utils;
+package com.tonni.notifx.Utils.scheduler;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+
+import com.tonni.notifx.Utils.receivers.NotifyReceiver;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

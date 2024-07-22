@@ -1,4 +1,4 @@
-package com.tonni.notifx.Utils;
+package com.tonni.notifx.Utils.receivers;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -12,6 +12,7 @@ import androidx.annotation.RequiresApi;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.tonni.notifx.Utils.Storage.StorageUtils;
 import com.tonni.notifx.models.ForexNewsItem;
 
 import java.lang.reflect.Type;

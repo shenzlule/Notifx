@@ -1,13 +1,13 @@
-package com.tonni.notifx.Utils;
+package com.tonni.notifx.Utils.receivers;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
-import java.util.Calendar;
+
+import com.tonni.notifx.Utils.workers.FetchWorker;
+import com.tonni.notifx.Utils.workers.NotifyWorker;
 
 public class NotifyReceiver extends BroadcastReceiver {
     @Override
