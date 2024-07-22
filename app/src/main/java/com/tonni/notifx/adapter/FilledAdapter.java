@@ -62,7 +62,6 @@ public class FilledAdapter extends RecyclerView.Adapter<FilledAdapter.ViewHolder
             holder.date.setText(String.valueOf("Date: " + convertMillisToDateString(Long.parseLong(pendingPrice.getDate_filled()))));
             holder.pending_mar_notes.setSelected(true);
             holder.elp.setText(String.valueOf("Elapsed hours: " + elapsedHours));
-            Toast.makeText(context, pendingPrice.getPair(), Toast.LENGTH_SHORT).show();
             holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {

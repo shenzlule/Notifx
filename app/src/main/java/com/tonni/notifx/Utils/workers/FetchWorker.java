@@ -130,8 +130,9 @@ public class FetchWorker extends Worker {
 
                             Calendar calendar = Calendar.getInstance();
                             for (int i = 0; i < apiResponse.getQuotes().size(); i++) {
+//                                Log.d("MainActivity-Inside-api", pair);
 
-                                if (apiResponse.getQuotes().get(i).getInstrument().equals("null")) {
+                                if (apiResponse.getQuotes().get(i).getInstrument()== null) {
                                     String pair = apiResponse.getQuotes().get(i).getBaseCurrency() + apiResponse.getQuotes().get(i).getQuoteCurrency();
                                     double price = apiResponse.getQuotes().get(i).getMid();
                                     long dateMillis = apiResponse.getTimestamp();
@@ -146,7 +147,7 @@ public class FetchWorker extends Worker {
 
 
                                             if (pendingList.get(j).getDirection().equals("above")) {
-                                                if (price >= price_) {
+                                                if (price > price_) {
                                                     pendingList_copy.get(j).setFilled("Yes");
                                                     pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
                                                     Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
@@ -161,8 +162,8 @@ public class FetchWorker extends Worker {
                                                     }
 
                                                     Notification notification = new NotificationCompat.Builder(context, channelId)
-                                                            .setContentTitle("Watch list")
-                                                            .setContentText(pendingList.get(j).getPair())
+                                                            .setContentTitle("Watch list["+pendingList.get(j).getPair()+"]")
+                                                            .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
                                                             .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
                                                             .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
                                                             .build();
@@ -171,8 +172,8 @@ public class FetchWorker extends Worker {
                                                     // Display the response using Log
                                                     Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                 }
-                                            } else if (pendingList.get(j).getDirection().equals("below") && !pendingList.get(j).equals("Yes")) {
-                                                if (price <= price_) {
+                                            } else if (pendingList.get(j).getDirection().equals("below") ) {
+                                                if (price < price_) {
                                                     pendingList_copy.get(j).setFilled("Yes");
                                                     pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
                                                     Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
@@ -187,8 +188,8 @@ public class FetchWorker extends Worker {
                                                     }
 
                                                     Notification notification = new NotificationCompat.Builder(context, channelId)
-                                                            .setContentTitle("Watch list")
-                                                            .setContentText(pendingList.get(j).getPair())
+                                                            .setContentTitle("Watch list["+pendingList.get(j).getPair()+"]")
+                                                            .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
                                                             .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
                                                             .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
                                                             .build();
@@ -205,7 +206,7 @@ public class FetchWorker extends Worker {
                                     }
 
                                 }
-                                else if (!apiResponse.getQuotes().get(i).getInstrument().equals("null")) {
+                                else if (apiResponse.getQuotes().get(i).getInstrument() != null) {
                                     String pair = apiResponse.getQuotes().get(i).getInstrument();
                                     double price = apiResponse.getQuotes().get(i).getMid();
                                     long dateMillis = apiResponse.getTimestamp();
@@ -220,7 +221,7 @@ public class FetchWorker extends Worker {
 
 
                                             if (pendingList.get(j).getDirection().equals("above")) {
-                                                if (price >= price_) {
+                                                if (price > price_) {
                                                     pendingList_copy.get(j).setFilled("Yes");
                                                     pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
                                                     Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
@@ -235,8 +236,8 @@ public class FetchWorker extends Worker {
                                                     }
 
                                                     Notification notification = new NotificationCompat.Builder(context, channelId)
-                                                            .setContentTitle("Watch list")
-                                                            .setContentText(pendingList.get(j).getPair())
+                                                            .setContentTitle("Watch list["+pendingList.get(j).getPair()+"]")
+                                                            .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
                                                             .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
                                                             .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
                                                             .build();
@@ -245,8 +246,8 @@ public class FetchWorker extends Worker {
                                                     // Display the response using Log
                                                     Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                 }
-                                            } else if (pendingList.get(j).getDirection().equals("below") && !pendingList.get(j).equals("Yes")) {
-                                                if (price <= price_) {
+                                            } else if (pendingList.get(j).getDirection().equals("below")) {
+                                                if (price < price_) {
                                                     pendingList_copy.get(j).setFilled("Yes");
                                                     pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
                                                     Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
@@ -261,8 +262,8 @@ public class FetchWorker extends Worker {
                                                     }
 
                                                     Notification notification = new NotificationCompat.Builder(context, channelId)
-                                                            .setContentTitle("Watch list")
-                                                            .setContentText(pendingList.get(j).getPair())
+                                                            .setContentTitle("Watch list["+pendingList.get(j).getPair()+"]")
+                                                            .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
                                                             .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
                                                             .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
                                                             .build();

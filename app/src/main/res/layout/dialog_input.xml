@@ -85,8 +85,6 @@
             android:id="@+id/bear"
             android:layout_width="wrap_content"
             android:textSize="13sp"
-            android:checked="true"
-
             android:buttonTint="@color/uclag"
             android:layout_height="wrap_content"
             android:textColor="@color/uclag"

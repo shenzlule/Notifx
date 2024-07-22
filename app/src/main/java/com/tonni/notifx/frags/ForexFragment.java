@@ -34,6 +34,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ForexFragment extends Fragment implements RefreshableFragment {
 
@@ -110,9 +111,8 @@ public class ForexFragment extends Fragment implements RefreshableFragment {
 
         RadioGroup dirGroup = dialogView.findViewById(R.id.dir);
         // Get the selected RadioButton ID from complianceGroup
-        int dirId = dirGroup.getCheckedRadioButtonId();
-        RadioButton dirRadioButton = dialogView.findViewById(dirId);
-        String  dirText = dirRadioButton.getText().toString();
+        AtomicInteger dirId = new AtomicInteger(-1);
+
 
 
         AlertDialog dialog = builder.create();
@@ -122,16 +122,26 @@ public class ForexFragment extends Fragment implements RefreshableFragment {
         buttonOk.setOnClickListener(v -> {
             String priceInputText = price_input.getText().toString().trim();
             String notesInputText = notes_input.getText().toString().trim();
+            dirId.set(dirGroup.getCheckedRadioButtonId());
 
             if (priceInputText.isEmpty()) {
                 Toast.makeText(getContext(), "Price cannot be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            if (dirId.get() ==-1) {
+                Toast.makeText(getContext(), "Direction can not be null", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            RadioButton dirRadioButton = dialogView.findViewById(dirId.get());
+
+            String  dirText = dirRadioButton.getText().toString();
+
             if (notesInputText.isEmpty()) {
                 Toast.makeText(getContext(), "Note cannot be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
+
 
             try {
 

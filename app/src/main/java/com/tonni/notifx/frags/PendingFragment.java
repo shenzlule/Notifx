@@ -50,13 +50,22 @@ public class PendingFragment extends Fragment implements RefreshableFragment {
         // Parse JSON data
         Type listType = new TypeToken<List<PendingPrice>>() {}.getType();
         List<PendingPrice> loadedPendingPrices = new Gson().fromJson(readJsonData, listType);
+        List<PendingPrice> loadedPendingPrices_new=new ArrayList<>();
+
 
         if (loadedPendingPrices == null) {
             loadedPendingPrices = new ArrayList<>();
+        }else {
+            for (int i = 0; i < loadedPendingPrices.size(); i++) {
+                if (!loadedPendingPrices.get(i).getFilled().equals("Yes") ) {
+                    loadedPendingPrices_new.add(loadedPendingPrices.get(i));
+                }
+            }
+
         }
 
         pendingPrices.clear();
-        pendingPrices.addAll(loadedPendingPrices);
+        pendingPrices.addAll(loadedPendingPrices_new);
         pendingAdapter.notifyDataSetChanged();
     }
 
