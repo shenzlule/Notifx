@@ -131,7 +131,7 @@ public class FetchWorker extends Worker {
                             Calendar calendar = Calendar.getInstance();
                             for (int i = 0; i < apiResponse.getQuotes().size(); i++) {
 
-                                if (apiResponse.getQuotes().get(i).getInstrument() == null) {
+                                if (apiResponse.getQuotes().get(i).getInstrument().equals("null")) {
                                     String pair = apiResponse.getQuotes().get(i).getBaseCurrency() + apiResponse.getQuotes().get(i).getQuoteCurrency();
                                     double price = apiResponse.getQuotes().get(i).getMid();
                                     long dateMillis = apiResponse.getTimestamp();
@@ -205,7 +205,7 @@ public class FetchWorker extends Worker {
                                     }
 
                                 }
-                                else if (apiResponse.getQuotes().get(i).getInstrument() != null) {
+                                else if (!apiResponse.getQuotes().get(i).getInstrument().equals("null")) {
                                     String pair = apiResponse.getQuotes().get(i).getInstrument();
                                     double price = apiResponse.getQuotes().get(i).getMid();
                                     long dateMillis = apiResponse.getTimestamp();
