@@ -37,7 +37,7 @@ public class FetchWorker extends Worker {
 
     private static final String URL = "https://marketdata.tradermade.com/api/v1/live";
     private static final String URL2 = "https://marketdata.tradermade.com/api/v1/live";
-    private static final String CURRENCY = "USDJPY,GBPUSD,USA30,GBPUSD,EURUSD,XAUUSD,USDCAD,USDCHF";
+    private static final String CURRENCY = "USDJPY,USA30,GBPUSD,EURUSD,XAUUSD,USDCAD,USDCHF,EURJPY,GBPJPY,NZDCAD,CHFJPY,CADCHF,CADJPY";
     private static final String API_KEY = "HvHNPZP8zjXZuRYwAj-S";
     private static final String API_KEY2 = "HvHNPZP8zjXZuRYwAj-S";
 
@@ -89,7 +89,7 @@ public class FetchWorker extends Worker {
 
 
 
-        final String[] myString = {"No response  from API"};
+
 
         List<ApiTurn> finalTurnList = turnList;
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
@@ -124,156 +124,158 @@ public class FetchWorker extends Worker {
                         }
 
 
-                        if (pendingList != null || apiResponse.getQuotes() != null) {
 
 
+                            if (pendingList != null || apiResponse.getQuotes() != null) {
 
-                            Calendar calendar = Calendar.getInstance();
-                            for (int i = 0; i < apiResponse.getQuotes().size(); i++) {
+
+                                Calendar calendar = Calendar.getInstance();
+                                for (int i = 0; i < apiResponse.getQuotes().size(); i++) {
 //                                Log.d("MainActivity-Inside-api", pair);
 
-                                if (apiResponse.getQuotes().get(i).getInstrument()== null) {
-                                    String pair = apiResponse.getQuotes().get(i).getBaseCurrency() + apiResponse.getQuotes().get(i).getQuoteCurrency();
-                                    double price = apiResponse.getQuotes().get(i).getMid();
-                                    long dateMillis = apiResponse.getTimestamp();
+                                    if (apiResponse.getQuotes().get(i).getInstrument() == null) {
+                                        String pair = apiResponse.getQuotes().get(i).getBaseCurrency() + apiResponse.getQuotes().get(i).getQuoteCurrency();
+                                        double price = apiResponse.getQuotes().get(i).getMid();
+                                        long dateMillis = apiResponse.getTimestamp();
 
 
-                                    Log.d("MainActivity-Inside-api", pair);
-                                    for (int j = 0; j < pendingList.size(); j++) {
+                                        Log.d("MainActivity-Inside-api", pair);
+                                        for (int j = 0; j < pendingList.size(); j++) {
 
-                                        if (pendingList.get(j).getPair().equals(pair) && !pendingList.get(j).equals("Yes")) {
-                                            long dateMillis_ = Long.parseLong(pendingList.get(j).getDate());
-                                            double price_ = Double.parseDouble(String.valueOf((pendingList.get(j).getPrice())));
+                                            if (pendingList.get(j).getPair().equals(pair) && !pendingList.get(j).getFilled().equals("Yes")) {
+                                                long dateMillis_ = Long.parseLong(pendingList.get(j).getDate());
+                                                double price_ = Double.parseDouble(String.valueOf((pendingList.get(j).getPrice())));
 
 
-                                            if (pendingList.get(j).getDirection().equals("above")) {
-                                                if (price > price_) {
-                                                    pendingList_copy.get(j).setFilled("Yes");
-                                                    pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
-                                                    Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
+                                                if (pendingList.get(j).getDirection().equals("above")) {
+                                                    if (price > price_) {
+                                                        pendingList_copy.get(j).setFilled("Yes");
+                                                        pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+                                                        Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
 
-                                                    // Create notification
-                                                    NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                                                    String channelId = "Api 10 interval data";
-                                                    String channelName = "10 Minute Api Notification";
-                                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                                        NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
-                                                        notificationManager.createNotificationChannel(channel);
+                                                        // Create notification
+                                                        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                                                        String channelId = "Api 10 interval data";
+                                                        String channelName = "10 Minute Api Notification";
+                                                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                                                            notificationManager.createNotificationChannel(channel);
+                                                        }
+
+                                                        Notification notification = new NotificationCompat.Builder(context, channelId)
+                                                                .setContentTitle("Watch list[" + pendingList.get(j).getPair() + "]")
+                                                                .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
+                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
+                                                                .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
+                                                                .build();
+
+                                                        notificationManager.notify((int) System.currentTimeMillis(), notification);
+                                                        // Display the response using Log
+                                                        Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                     }
+                                                } else if (pendingList.get(j).getDirection().equals("below")) {
+                                                    if (price < price_) {
+                                                        pendingList_copy.get(j).setFilled("Yes");
+                                                        pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+                                                        Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
 
-                                                    Notification notification = new NotificationCompat.Builder(context, channelId)
-                                                            .setContentTitle("Watch list["+pendingList.get(j).getPair()+"]")
-                                                            .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
-                                                            .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
-                                                            .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
-                                                            .build();
+                                                        // Create notification
+                                                        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                                                        String channelId = "Api 10 interval data";
+                                                        String channelName = "10 Minute Api Notification";
+                                                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                                                            notificationManager.createNotificationChannel(channel);
+                                                        }
 
-                                                    notificationManager.notify((int) System.currentTimeMillis(), notification);
-                                                    // Display the response using Log
-                                                    Log.d("MainActivity-Api-worker", apiResponse.toString());
-                                                }
-                                            } else if (pendingList.get(j).getDirection().equals("below") ) {
-                                                if (price < price_) {
-                                                    pendingList_copy.get(j).setFilled("Yes");
-                                                    pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
-                                                    Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
+                                                        Notification notification = new NotificationCompat.Builder(context, channelId)
+                                                                .setContentTitle("Watch list[" + pendingList.get(j).getPair() + "]")
+                                                                .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
+                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
+                                                                .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
+                                                                .build();
 
-                                                    // Create notification
-                                                    NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                                                    String channelId = "Api 10 interval data";
-                                                    String channelName = "10 Minute Api Notification";
-                                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                                        NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
-                                                        notificationManager.createNotificationChannel(channel);
+                                                        notificationManager.notify((int) System.currentTimeMillis(), notification);
+                                                        // Display the response using Log
+                                                        Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                     }
-
-                                                    Notification notification = new NotificationCompat.Builder(context, channelId)
-                                                            .setContentTitle("Watch list["+pendingList.get(j).getPair()+"]")
-                                                            .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
-                                                            .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
-                                                            .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
-                                                            .build();
-
-                                                    notificationManager.notify((int) System.currentTimeMillis(), notification);
-                                                    // Display the response using Log
-                                                    Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                 }
+
+
                                             }
-
 
                                         }
 
-                                    }
-
-                                }
-                                else if (apiResponse.getQuotes().get(i).getInstrument() != null) {
-                                    String pair = apiResponse.getQuotes().get(i).getInstrument();
-                                    double price = apiResponse.getQuotes().get(i).getMid();
-                                    long dateMillis = apiResponse.getTimestamp();
+                                    } else if (apiResponse.getQuotes().get(i).getInstrument() != null) {
+                                        String pair = apiResponse.getQuotes().get(i).getInstrument();
+                                        double price = apiResponse.getQuotes().get(i).getMid();
+                                        long dateMillis = apiResponse.getTimestamp();
 
 
-                                    Log.d("MainActivity-Inside-ins", pair);
-                                    for (int j = 0; j < pendingList.size(); j++) {
+                                        Log.d("MainActivity-Inside-ins", pair);
+                                        for (int j = 0; j < pendingList.size(); j++) {
 
-                                        if (pendingList.get(j).getPair().equals(pair) && !pendingList.get(j).equals("Yes")) {
-                                            long dateMillis_ = Long.parseLong(pendingList.get(j).getDate());
-                                            double price_ = Double.parseDouble(String.valueOf((pendingList.get(j).getPrice())));
+                                            if (pendingList.get(j).getPair().equals(pair) && !pendingList.get(j).getFilled().equals("Yes")) {
+                                                long dateMillis_ = Long.parseLong(pendingList.get(j).getDate());
+                                                double price_ = Double.parseDouble(String.valueOf((pendingList.get(j).getPrice())));
 
 
-                                            if (pendingList.get(j).getDirection().equals("above")) {
-                                                if (price > price_) {
-                                                    pendingList_copy.get(j).setFilled("Yes");
-                                                    pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
-                                                    Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
+                                                if (pendingList.get(j).getDirection().equals("above")) {
+                                                    if (price > price_) {
+                                                        pendingList_copy.get(j).setFilled("Yes");
+                                                        pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+                                                        Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
 
-                                                    // Create notification
-                                                    NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                                                    String channelId = "Api 10 interval data";
-                                                    String channelName = "10 Minute Api Notification";
-                                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                                        NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
-                                                        notificationManager.createNotificationChannel(channel);
+                                                        // Create notification
+                                                        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                                                        String channelId = "Api 10 interval data";
+                                                        String channelName = "10 Minute Api Notification";
+                                                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                                                            notificationManager.createNotificationChannel(channel);
+                                                        }
+
+                                                        Notification notification = new NotificationCompat.Builder(context, channelId)
+                                                                .setContentTitle("Watch list[" + pendingList.get(j).getPair() + "]")
+                                                                .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
+                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
+                                                                .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
+                                                                .build();
+
+                                                        notificationManager.notify((int) System.currentTimeMillis(), notification);
+                                                        // Display the response using Log
+                                                        Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                     }
+                                                } else if (pendingList.get(j).getDirection().equals("below")) {
+                                                    if (price < price_) {
+                                                        pendingList_copy.get(j).setFilled("Yes");
+                                                        pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+                                                        Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
 
-                                                    Notification notification = new NotificationCompat.Builder(context, channelId)
-                                                            .setContentTitle("Watch list["+pendingList.get(j).getPair()+"]")
-                                                            .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
-                                                            .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
-                                                            .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
-                                                            .build();
+                                                        // Create notification
+                                                        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                                                        String channelId = "Api 10 interval data";
+                                                        String channelName = "10 Minute Api Notification";
+                                                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                                                            notificationManager.createNotificationChannel(channel);
+                                                        }
 
-                                                    notificationManager.notify((int) System.currentTimeMillis(), notification);
-                                                    // Display the response using Log
-                                                    Log.d("MainActivity-Api-worker", apiResponse.toString());
-                                                }
-                                            } else if (pendingList.get(j).getDirection().equals("below")) {
-                                                if (price < price_) {
-                                                    pendingList_copy.get(j).setFilled("Yes");
-                                                    pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
-                                                    Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
+                                                        Notification notification = new NotificationCompat.Builder(context, channelId)
+                                                                .setContentTitle("Watch list[" + pendingList.get(j).getPair() + "]")
+                                                                .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
+                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
+                                                                .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
+                                                                .build();
 
-                                                    // Create notification
-                                                    NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                                                    String channelId = "Api 10 interval data";
-                                                    String channelName = "10 Minute Api Notification";
-                                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                                        NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
-                                                        notificationManager.createNotificationChannel(channel);
+                                                        notificationManager.notify((int) System.currentTimeMillis(), notification);
+                                                        // Display the response using Log
+                                                        Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                     }
-
-                                                    Notification notification = new NotificationCompat.Builder(context, channelId)
-                                                            .setContentTitle("Watch list["+pendingList.get(j).getPair()+"]")
-                                                            .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
-                                                            .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
-                                                            .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
-                                                            .build();
-
-                                                    notificationManager.notify((int) System.currentTimeMillis(), notification);
-                                                    // Display the response using Log
-                                                    Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                 }
+
+
                                             }
-
 
                                         }
 
@@ -283,14 +285,12 @@ public class FetchWorker extends Worker {
 
                             }
 
+
+                            addNewPending(pendingList_copy, context);
+                            String jsonData_turn_list = gson.toJson(finalTurnList);
+                            StorageUtils.writeJsonToFile(context, FILE_NAME_TURN, jsonData_turn_list);
                         }
 
-
-                        addNewPending(pendingList_copy, context);
-                        String jsonData_turn_list = gson.toJson(finalTurnList);
-                        StorageUtils.writeJsonToFile(context, FILE_NAME_TURN, jsonData_turn_list);
-
-                    }
                 },
                 new Response.ErrorListener() {
 
@@ -322,8 +322,34 @@ public class FetchWorker extends Worker {
                 }
         );
 
-        // Add the request to the RequestQueue
-        requestQueue.add(jsonObjectRequest);
+
+        // Load Forex news items from JSON
+        String readJsonData_valid = StorageUtils.readJsonFromFile(context, FILE_NAME_PENDING);
+
+        // Parse JSON data
+        Type listType = new TypeToken<List<PendingPrice>>() {
+        }.getType();
+        List<PendingPrice> testingValiditityList = new Gson().fromJson(readJsonData_valid, listType);
+
+
+        if(testingValiditityList == null){
+            testingValiditityList =new ArrayList<PendingPrice>();
+        }
+        int getWaitingList=0;
+
+        for (int i = 0; i < testingValiditityList.size(); i++) {
+            if(testingValiditityList.get(i).getFilled().equals("Not")){
+                getWaitingList++;
+            }
+        }
+
+
+
+        if(getWaitingList>0) {
+
+            // Add the request to the RequestQueue
+            requestQueue.add(jsonObjectRequest);
+        }
 
 
     }

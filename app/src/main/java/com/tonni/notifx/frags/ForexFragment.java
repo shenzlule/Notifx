@@ -59,13 +59,20 @@ public class ForexFragment extends Fragment implements RefreshableFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         List<ForexCurrency> forexCurrencyList = new ArrayList<>();
-        forexCurrencyList.add(new ForexCurrency("GBP", "USD", 1.29821,0,5));
-        forexCurrencyList.add(new ForexCurrency("EUR", "USD", 1.1800,0,5));
-        forexCurrencyList.add(new ForexCurrency( "USD","JPY", 0.0094,0,3));
-        forexCurrencyList.add(new ForexCurrency( "USA30", "@",0.0094,0,1));
-        forexCurrencyList.add(new ForexCurrency( "XAU","USD", 0.0094,0,3));
-        forexCurrencyList.add(new ForexCurrency( "USD","CAD", 0.0094,0,5));
-        forexCurrencyList.add(new ForexCurrency("USD","CHF",  0.0094,0,5));
+        forexCurrencyList.add(new ForexCurrency( "USA30", "@",  0,0,1));
+        forexCurrencyList.add(new ForexCurrency( "XAU","USD",  0,0,3));
+        forexCurrencyList.add(new ForexCurrency("GBP", "USD",  0,0,5));
+        forexCurrencyList.add(new ForexCurrency("GBP","JPY",  0,0,3));
+        forexCurrencyList.add(new ForexCurrency("EUR", "USD",  0,0,5));
+        forexCurrencyList.add(new ForexCurrency("EUR","JPY",  0,0,3));
+        forexCurrencyList.add(new ForexCurrency( "USD","JPY",  0,0,3));
+        forexCurrencyList.add(new ForexCurrency( "USD","CAD",  0,0,5));
+        forexCurrencyList.add(new ForexCurrency("USD","CHF",  0,0,5));
+        forexCurrencyList.add(new ForexCurrency("CAD","JPY",  0,0,3));
+        forexCurrencyList.add(new ForexCurrency("CAD","CHF",  0,0,5));
+        forexCurrencyList.add(new ForexCurrency("CHF","JPY",  0,0,3));
+        forexCurrencyList.add(new ForexCurrency("NZD","CAD",  0,0,5));
+
 
         readPending();
 

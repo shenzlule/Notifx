@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -73,7 +72,7 @@ public class FilledAdapter extends RecyclerView.Adapter<FilledAdapter.ViewHolder
                                 public void onClick(DialogInterface dialog, int which) {
 
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                        filledFragment.deleteVideo(pendingPrice, holder.getAdapterPosition());
+                                        filledFragment.deleteFilledPos(pendingPrice, holder.getAdapterPosition());
                                     }
                                 }
                             })

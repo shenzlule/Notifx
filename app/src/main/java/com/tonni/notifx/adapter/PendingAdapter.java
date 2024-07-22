@@ -2,7 +2,6 @@ package com.tonni.notifx.adapter;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.IntentSender;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -79,7 +78,7 @@ public class PendingAdapter extends RecyclerView.Adapter<PendingAdapter.ViewHold
                                 public void onClick(DialogInterface dialog, int which) {
 
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                            pendingFragment.deleteVideo(pendingPrice, holder.getAdapterPosition());
+                                            pendingFragment.deletePendingPos(pendingPrice, holder.getAdapterPosition());
                                         }
                                 }
                             })

@@ -90,7 +90,7 @@ public class FilledFragment extends Fragment implements RefreshableFragment {
     }
 
 
-    public void deleteVideo(PendingPrice pendingPrice,int pos){
+    public void deleteFilledPos(PendingPrice pendingPrice, int pos){
         filledPrices.remove(pos);
         filledAdapter.notifyItemRemoved(pos);
         addNewPending();

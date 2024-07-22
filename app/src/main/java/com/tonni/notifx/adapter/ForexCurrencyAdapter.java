@@ -44,7 +44,7 @@ public class ForexCurrencyAdapter extends RecyclerView.Adapter<ForexCurrencyAdap
         for (int i = 0; i < pendingPrices.size(); i++) {
             Log.d("MainActivity-Pairs",pendingPrices.get(i).getPair_visible()+"==="+forexCurrency.getBaseCurrency() + "/" + forexCurrency.getQuoteCurrency() );
 
-            if (pendingPrices.get(i).getPair_visible().equals(forexCurrency.getBaseCurrency() + "/" + forexCurrency.getQuoteCurrency())) {
+            if (pendingPrices.get(i).getPair_visible().equals(forexCurrency.getBaseCurrency() + "/" + forexCurrency.getQuoteCurrency()) && pendingPrices.get(i).getFilled().equals("Not")) {
                 alertTracker++;
             }
 
