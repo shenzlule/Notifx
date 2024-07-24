@@ -20,12 +20,12 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 
     private List<ForexCurrency> forexCurrencyList;
     private HistoryFragment historyFragment;
-    List<PendingPrice> pendingPrices;
 
-    public HistoryAdapter(List<ForexCurrency> forexCurrencyList, HistoryFragment forexFragment, List<PendingPrice> pendingPrices) {
+
+    public HistoryAdapter(List<ForexCurrency> forexCurrencyList, HistoryFragment forexFragment) {
         this.forexCurrencyList = forexCurrencyList;
         this.historyFragment = forexFragment;
-        this.pendingPrices=pendingPrices;
+
     }
 
     @NonNull
@@ -38,19 +38,9 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ForexCurrency forexCurrency = forexCurrencyList.get(position);
-        int alertTracker=0;
-        for (int i = 0; i < pendingPrices.size(); i++) {
-            if (pendingPrices.get(i).getPair().equals(forexCurrency.getBaseCurrency() + "/" + forexCurrency.getQuoteCurrency())){
-                alertTracker++;
-            }
 
-        }
-        holder.currencyPair.setText(forexCurrency.getBaseCurrency() + "/" + forexCurrency.getQuoteCurrency());
-        holder.alertNumber.setText(String.valueOf(alertTracker));
-        holder.pending_mar.setSelected(true);
 
-        holder.itemView.setOnClickListener(v -> historyFragment.showInputDialog(position,forexCurrency));
-        alertTracker=0;
+
     }
 
     @Override

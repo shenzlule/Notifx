@@ -5,6 +5,7 @@ public class TrackRefresh {
     private static int NewsFrag=0;
     private static int PendingFrag=0;
     private static int FilledFrag=0;
+    private static int CurrencyFrag=0;
 
 
 
@@ -31,5 +32,13 @@ public class TrackRefresh {
 
     public static void setFilledFrag(int filledFrag) {
         FilledFrag = filledFrag;
+    }
+
+    public static int getCurrencyFrag() {
+        return CurrencyFrag;
+    }
+
+    public static void setCurrencyFrag(int currencyFrag) {
+        CurrencyFrag = currencyFrag;
     }
 }

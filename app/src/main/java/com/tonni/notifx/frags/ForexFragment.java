@@ -3,11 +3,13 @@ package com.tonni.notifx.frags;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -25,6 +27,7 @@ import com.tonni.notifx.R;
 import com.tonni.notifx.Utils.Storage.StorageUtils;
 import com.tonni.notifx.adapter.ForexCurrencyAdapter;
 import com.tonni.notifx.Utils.SwipeToRevealCallback;
+import com.tonni.notifx.inter.ForexCurrencyInterface;
 import com.tonni.notifx.inter.MainActivityInterface;
 import com.tonni.notifx.inter.RefreshableFragment;
 import com.tonni.notifx.models.ForexCurrency;
@@ -36,19 +39,28 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ForexFragment extends Fragment implements RefreshableFragment {
+public class ForexFragment extends Fragment implements RefreshableFragment, ForexCurrencyInterface {
 
     private MainActivityInterface mainActivityInterface;
     private RecyclerView recyclerView;
     private ForexCurrencyAdapter adapter;
     private SwipeToRevealCallback swipeToRevealCallback;
     private static final String FILE_NAME = "forex_data.json";
+    private static final String FILE_NAME_PENDING_FOREX_LOCAL = "pending_forex.json";
+    private static final String FILE_NAME_CURRENCIES_LOCAL = "currencies.json";
     private static final String FILE_NAME_PENDING = "pending.json";
-    private List<PendingPrice> pendingPrices;
+    private ArrayList<PendingPrice> pendingPrices;
+    private ArrayList<ForexCurrency> currencies;
+    private static final String FILE_NAME_PENDING_LOCAL = "pending_pending.json";
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_forex, container, false);
+
+        // create a progress bar variable and set the id
+        final ProgressBar progressBar = view.findViewById(R.id.ProgressBar01);
+
+
 
         try {
             mainActivityInterface = (MainActivityInterface) getContext();
@@ -58,27 +70,25 @@ public class ForexFragment extends Fragment implements RefreshableFragment {
         recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        List<ForexCurrency> forexCurrencyList = new ArrayList<>();
-        forexCurrencyList.add(new ForexCurrency( "USA30", "@",  0,0,1));
-        forexCurrencyList.add(new ForexCurrency( "XAU","USD",  0,0,3));
-        forexCurrencyList.add(new ForexCurrency("GBP", "USD",  0,0,5));
-        forexCurrencyList.add(new ForexCurrency("GBP","JPY",  0,0,3));
-        forexCurrencyList.add(new ForexCurrency("EUR", "USD",  0,0,5));
-        forexCurrencyList.add(new ForexCurrency("EUR","JPY",  0,0,3));
-        forexCurrencyList.add(new ForexCurrency( "USD","JPY",  0,0,3));
-        forexCurrencyList.add(new ForexCurrency( "USD","CAD",  0,0,5));
-        forexCurrencyList.add(new ForexCurrency("USD","CHF",  0,0,5));
-        forexCurrencyList.add(new ForexCurrency("CAD","JPY",  0,0,3));
-        forexCurrencyList.add(new ForexCurrency("CAD","CHF",  0,0,5));
-        forexCurrencyList.add(new ForexCurrency("CHF","JPY",  0,0,3));
-        forexCurrencyList.add(new ForexCurrency("NZD","CAD",  0,0,5));
+        pendingPrices=new ArrayList<>();
+        currencies=new ArrayList<>();
 
 
-        readPending();
 
-        adapter = new ForexCurrencyAdapter(forexCurrencyList,this,pendingPrices);
+
+
+        adapter = new ForexCurrencyAdapter(currencies,this,pendingPrices);
         recyclerView.setAdapter(adapter);
-//
+
+        // show the progress bar
+
+        if(getLocalFile(currencies,pendingPrices))
+        {
+            progressBar.setVisibility(View.GONE);
+        }
+
+
+
         return view;
     }
 
@@ -181,33 +191,15 @@ public class ForexFragment extends Fragment implements RefreshableFragment {
 
 
 
-    private void readPending(){
-
-        // Load Forex news items from JSON
-        String readJsonData = StorageUtils.readJsonFromFile(getContext(), FILE_NAME_PENDING);
-//        Toast.makeText(getContext(), "Read JSON: " + readJsonData, Toast.LENGTH_SHORT).show();
-
-        // Parse JSON data
-        Type listType = new TypeToken<List<PendingPrice>>() {}.getType();
-        pendingPrices = new Gson().fromJson(readJsonData, listType);
-
-        if (pendingPrices == null) {
-            pendingPrices = new ArrayList<>();
-        }
-    }
-
     private void addNewPending(int position ,String price , String note,String pair,String date,String dir,String visible_lable){
         pendingPrices.add(new PendingPrice(price,pair,visible_lable,date,note,"Not","Null",dir));
         adapter.notifyItemChanged(position);
-        Gson gson = new Gson();
-        List<PendingPrice> pendingPricesClear=new ArrayList<>();
-        String jsonData_ = gson.toJson(pendingPricesClear);
-        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING, jsonData_);
-
-//        forexNewsItems=null;
-        String jsonData = gson.toJson(pendingPrices);
-        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING, jsonData);
-
+        try {
+            mainActivityInterface.UpdatePendingMainActivity().refreshUIFromForex(new PendingPrice(price,pair,visible_lable,date,note,"Not","Null",dir));
+        }catch (Exception e){
+            saved_file_pending();
+        }
+        saved_files();
     }
 
     private static String  check_price_pip(String price_arg, int pip_number) {
@@ -253,7 +245,144 @@ public class ForexFragment extends Fragment implements RefreshableFragment {
     @Override
     public void refresh() {
 
-//        mainActivityInterface.MakeConnThruInter();
-//        adapter.notifyDataSetChanged();
+        Log.d("PendingFragment", "Refreshing data...");
+
+
     }
+
+    @Override
+    public void UpdateUI() {
+
+    }
+
+    @Override
+    public void refreshUIFromPending(int pos) {
+        pendingPrices.remove(pos);
+        adapter.notifyDataSetChanged();
+        saved_file();
+    }
+
+
+    public boolean getLocalFile(ArrayList<ForexCurrency> forexCurrencies,ArrayList<PendingPrice> pendingPricesForex){
+        // Load  items from JSON
+        String readJsonData1 = StorageUtils.readJsonFromFile(getContext(), FILE_NAME_PENDING_FOREX_LOCAL);
+        String readJsonData2 = StorageUtils.readJsonFromFile(getContext(), FILE_NAME_CURRENCIES_LOCAL);
+
+        // Parse JSON data
+        Type listType1 = new TypeToken<List<ForexCurrency>>() {}.getType();
+        ArrayList<ForexCurrency> currencies=new Gson().fromJson(readJsonData2, listType1);
+
+        Type listType2 = new TypeToken<List<PendingPrice>>() {}.getType();
+        ArrayList<PendingPrice> pendingPrices=new Gson().fromJson(readJsonData1, listType2);
+
+
+        if(currencies==null){
+            currencies=new ArrayList<ForexCurrency>();
+            currencies.add(new ForexCurrency( "USA30", "@",  0,0,1));
+            currencies.add(new ForexCurrency( "XAU","USD",  0,0,3));
+            currencies.add(new ForexCurrency("GBP", "USD",  0,0,5));
+            currencies.add(new ForexCurrency("GBP","JPY",  0,0,3));
+            currencies.add(new ForexCurrency("EUR", "USD",  0,0,5));
+            currencies.add(new ForexCurrency("EUR","JPY",  0,0,3));
+            currencies.add(new ForexCurrency( "USD","JPY",  0,0,3));
+            currencies.add(new ForexCurrency( "USD","CAD",  0,0,5));
+            currencies.add(new ForexCurrency("USD","CHF",  0,0,5));
+            currencies.add(new ForexCurrency("CAD","JPY",  0,0,3));
+            currencies.add(new ForexCurrency("CAD","CHF",  0,0,5));
+            currencies.add(new ForexCurrency("CHF","JPY",  0,0,3));
+            currencies.add(new ForexCurrency("NZD","CAD",  0,0,5));
+
+            // save to local
+            Gson gson = new Gson();
+            String jsonData = gson.toJson(currencies);
+            StorageUtils.writeJsonToFile(getContext(), FILE_NAME_CURRENCIES_LOCAL, jsonData);
+        }
+        if(pendingPrices==null){
+            pendingPrices=new ArrayList<PendingPrice>();
+
+            // save to local
+            Gson gson = new Gson();
+            String jsonData = gson.toJson(pendingPrices);
+            StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_FOREX_LOCAL, jsonData);
+
+        }
+
+        forexCurrencies.addAll(currencies);
+        pendingPricesForex.addAll(pendingPrices);
+        adapter.notifyDataSetChanged();
+
+        return true;
+    }
+
+    public  void saved_file(){
+        Gson gson = new Gson();
+        //CLEAR
+        ArrayList<PendingPrice> clear_list=new ArrayList<>();
+        String jsonData_ = gson.toJson(clear_list);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_FOREX_LOCAL, jsonData_);
+
+        // SAVE DATA
+        String jsonData = gson.toJson(pendingPrices);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_FOREX_LOCAL, jsonData);
+
+    }
+    public  void saved_files(){
+        Gson gson = new Gson();
+        //CLEAR
+        List<PendingPrice> clear_list=new ArrayList<>();
+        String jsonData_ = gson.toJson(clear_list);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_FOREX_LOCAL, jsonData_);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING, jsonData_);
+
+        // SAVE DATA
+        String jsonData = gson.toJson(pendingPrices);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING, jsonData);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_FOREX_LOCAL, jsonData);
+
+    }
+
+    public  void saved_file_pending(){
+        Gson gson = new Gson();
+        //CLEAR
+        ArrayList<PendingPrice> clear_list=new ArrayList<>();
+        String jsonData_ = gson.toJson(clear_list);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData_);
+
+        // SAVE DATA
+        String jsonData = gson.toJson(pendingPrices);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData);
+
+    }
+
+
+    public void getLocalFile_main(){
+
+
+        Log.d("MainActivity-Broadcast", "broadcast forex");
+        // Load  items from JSON
+        String readJsonData1 = StorageUtils.readJsonFromFile(getContext(), FILE_NAME_PENDING_FOREX_LOCAL);
+
+
+        Type listType2 = new TypeToken<List<PendingPrice>>() {}.getType();
+        ArrayList<PendingPrice> pendingPrices_=new Gson().fromJson(readJsonData1, listType2);
+
+
+        if(pendingPrices_==null){
+            pendingPrices_=new ArrayList<PendingPrice>();
+
+            // save to local
+            Gson gson = new Gson();
+            String jsonData = gson.toJson(pendingPrices);
+            StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_FOREX_LOCAL, jsonData);
+
+        }
+
+        pendingPrices.clear();
+
+        pendingPrices.addAll(pendingPrices_);
+        Log.d("MainActivity-Broadcast", "broadcast forex =="+String.valueOf(pendingPrices.size()));
+        adapter.notifyDataSetChanged();
+
+    }
+
 }

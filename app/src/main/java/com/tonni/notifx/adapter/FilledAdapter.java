@@ -72,7 +72,7 @@ public class FilledAdapter extends RecyclerView.Adapter<FilledAdapter.ViewHolder
                                 public void onClick(DialogInterface dialog, int which) {
 
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                        filledFragment.deleteFilledPos(pendingPrice, holder.getAdapterPosition());
+                                        filledFragment.deleteFilledPos( holder.getAdapterPosition());
                                     }
                                 }
                             })

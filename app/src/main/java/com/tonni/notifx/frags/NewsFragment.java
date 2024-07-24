@@ -31,9 +31,8 @@ import com.tonni.notifx.R;
 import com.tonni.notifx.Utils.receivers.AlarmReceiver;
 import com.tonni.notifx.Utils.Icmp4a;
 import com.tonni.notifx.Utils.Storage.StorageUtils;
-import com.tonni.notifx.Utils.SwipeToRevealCallback;
+
 import com.tonni.notifx.models.TrackRefresh;
-import com.tonni.notifx.adapter.ForexCurrencyAdapter;
 import com.tonni.notifx.adapter.ForexNewsAdapter;
 import com.tonni.notifx.inter.RefreshableFragment;
 import com.tonni.notifx.models.ForexNewsItem;
@@ -59,14 +58,13 @@ import org.jsoup.select.Elements;
 
 public class NewsFragment extends Fragment implements RefreshableFragment {
 
-    private ForexCurrencyAdapter adapter;
-    private SwipeToRevealCallback swipeToRevealCallback;
+
     private static final String TAG = "ICMP";
     private static final int REQUEST_SET_ALARM = 1;
-    List<ForexNewsItem> validItems;
+    ArrayList<ForexNewsItem> validItems;
 
     private static final String FILE_NAME = "forex_events.json";
-    private List<ForexNewsItem> forexNewsItems;
+    private ArrayList<ForexNewsItem> forexNewsItems;
     private ForexNewsAdapter forexNewsAdapter;
     private RecyclerView recyclerView;
     private String readJsonData;
@@ -79,50 +77,23 @@ public class NewsFragment extends Fragment implements RefreshableFragment {
 
 
 
-            MakeConnection();
+        forexNewsItems=new ArrayList<>();
+
 
         // Initialize RecyclerView
         recyclerView = view.findViewById(R.id.recyclerViewForexNews);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
 
-
-        // Load Forex news items from JSON
-        readJsonData = StorageUtils.readJsonFromFile(getContext(), FILE_NAME);
-//        Toast.makeText(getContext(), "Read JSON: " + readJsonData, Toast.LENGTH_SHORT).show();
-
-        // Parse JSON data
-        Type listType = new TypeToken<List<ForexNewsItem>>() {}.getType();
-        forexNewsItems = new Gson().fromJson(readJsonData, listType);
-//        forexNewsItems=null;
-
-
-        if (forexNewsItems == null) {
-            forexNewsItems = new ArrayList<>();
-
-        }
-
-        // Filter out items with old dates
-        validItems = new ArrayList<>();
-        Calendar currentCalendar = Calendar.getInstance();
-
-        for (ForexNewsItem item : forexNewsItems) {
-            try {
-                Calendar itemCalendar = item.getCalendar();
-                if (itemCalendar != null && itemCalendar.after(currentCalendar)) {
-                    validItems.add(item);
-                }else {
-//                    Toast.makeText(getContext(), "Not after"+String.valueOf(itemCalendar), Toast.LENGTH_SHORT).show();
-                }
-
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
-
         // Set adapter
-        forexNewsAdapter = new ForexNewsAdapter(validItems,getContext());
+        forexNewsAdapter = new ForexNewsAdapter(forexNewsItems,getContext());
         recyclerView.setAdapter(forexNewsAdapter);
+
+        if(!getLocalFile(forexNewsItems)){
+            MakeConnection();
+        }
+
+
 
 
 
@@ -130,32 +101,19 @@ public class NewsFragment extends Fragment implements RefreshableFragment {
     }
 
     private  void readFine(){
-        // Load Forex news items from JSON
-        readJsonData = StorageUtils.readJsonFromFile(getContext(), FILE_NAME);
-//        Toast.makeText(getContext(), "Read JSON: " + readJsonData, Toast.LENGTH_SHORT).show();
-
-        // Parse JSON data
-        Type listType = new TypeToken<List<ForexNewsItem>>() {}.getType();
-        forexNewsItems = new Gson().fromJson(readJsonData, listType);
-//        forexNewsItems=null;
-
-
-        if (forexNewsItems == null) {
-            forexNewsItems = new ArrayList<>();
-
-        }
 
         // Filter out items with old dates
         validItems = new ArrayList<>();
         Calendar currentCalendar = Calendar.getInstance();
 
-        for (ForexNewsItem item : forexNewsItems) {
+        for (int i = 0; i < forexNewsItems.size(); i++) {
+            ForexNewsItem item=forexNewsItems.get(i);
             try {
                 Calendar itemCalendar = item.getCalendar();
                 if (itemCalendar != null && itemCalendar.after(currentCalendar)) {
                     validItems.add(item);
                 }else {
-//                    Toast.makeText(getContext(), "Not after"+String.valueOf(itemCalendar), Toast.LENGTH_SHORT).show();
+                    forexNewsAdapter.notifyItemRemoved(i);
                 }
 
             } catch (ParseException e) {
@@ -163,32 +121,20 @@ public class NewsFragment extends Fragment implements RefreshableFragment {
             }
         }
 
-        forexNewsAdapter.addAll(validItems);
+        forexNewsItems.clear();
+        forexNewsItems.addAll(validItems);
+        forexNewsAdapter.notifyDataSetChanged();
+
+
 
     }
 
-    private void saveForexNewsItems() {
-        Gson gson = new Gson();
-//        forexNewsItems=null;
-        String jsonData = gson.toJson(forexNewsItems);
-        StorageUtils.writeJsonToFile(getContext(), FILE_NAME, jsonData);
-    }
 
 
     @Override
     public void refresh() {
-
-
-        if (TrackRefresh.getNewsFrag()==0){
-            TrackRefresh.setNewsFrag(1);
-        }else {
-//            Toast.makeText(getContext(), "Refreshing data...", Toast.LENGTH_SHORT).show();
-            readPending();
-            readPending_on_null();
-
-        }
         Log.d("NewsFragment", "Refreshing data...");
-//        readPending(); // This method already clears the list and notifies the adapter
+
     }
 
     private class FetchForexData extends AsyncTask<Void, Void, List<ForexNewsItem>> {
@@ -208,10 +154,6 @@ public class NewsFragment extends Fragment implements RefreshableFragment {
 
         @Override
         protected void onPostExecute(List<ForexNewsItem> newsItems) {
-            // Display or process the extracted data
-//            for (ForexNewsItem item : newsItems) {
-//                System.out.println(item);
-//            }
 
             // Check and request permissions
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -255,7 +197,7 @@ public class NewsFragment extends Fragment implements RefreshableFragment {
                 String jsonData = jsonArray.toString();
 
                 // Save JSON data to file
-                writeJsonToFile(getContext(), "forex_events.json", jsonData);
+                writeJsonToFile(getContext(), FILE_NAME, jsonData);
 
             } else {
                 // Convert to JSON
@@ -292,13 +234,14 @@ public class NewsFragment extends Fragment implements RefreshableFragment {
                 String jsonData = jsonArray.toString();
 
                 // Save JSON data to file
-                StorageUtils.writeJsonToFile(getContext(), "forex_events.json", jsonData);
+                StorageUtils.writeJsonToFile(getContext(), FILE_NAME, jsonData);
 
 
-//                new Thread(() -> {
-//
-//                    getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "News events downloaded", Toast.LENGTH_SHORT).show());
-//                }).start();
+                new Thread(() -> {
+
+                    getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "News events downloaded", Toast.LENGTH_SHORT).show());
+                    getActivity().runOnUiThread(() -> getLocalFile(forexNewsItems));
+                }).start();
 
             }
 
@@ -369,16 +312,7 @@ public class NewsFragment extends Fragment implements RefreshableFragment {
                 dateTracker = row.select("td.calendar__date").text();
             }
         }
-//        newsItems.clear();
-//        newsItems.add(new ForexNewsItem("Sat Jul 20-1:37pm","Mee","Tony","red","Not","Not"));
-//        newsItems.add(new ForexNewsItem("Sat Jul 20-2:37pm","Mee","Tony","yel","Not","Not"));
-//        newsItems.add(new ForexNewsItem("Sat Jul 20-3:37pm","Mee","Tony","red","Not","Not"));
-//        newsItems.add(new ForexNewsItem("Sat Jul 20-4:37pm","Mee","Tony","ora","Not","Not"));
-//        newsItems.add(new ForexNewsItem("Sat Jul 20-5:37pm","Mee","Tony","yel","Not","Not"));
-//        newsItems.add(new ForexNewsItem("Sat Jul 20-6:37pm","Mee","Tony","red","Not","Not"));
-//        newsItems.add(new ForexNewsItem("Sat Jul 20-7:37pm","Mee","Tony","red","Not","Not"));
-//        newsItems.add(new ForexNewsItem("Sat Jul 20-8:37pm","Mee","Tony","red","Not","Not"));
-//        newsItems.add(new ForexNewsItem("Sat Jul 20-9:37pm","Mee","Tony","red","Not","Not"));
+
 
         return newsItems;
     }
@@ -525,26 +459,34 @@ public class NewsFragment extends Fragment implements RefreshableFragment {
 
     }
 
-    private void readPending() {
-        readFine();
-    }
 
 
-    private void readPending_on_null() {
-        // Load Forex news items from JSON
-        String readJsonData = StorageUtils.readJsonFromFile(getContext(), FILE_NAME);
-        Log.d("NewsFragment", "Read JSON: " + readJsonData);
-
+    public boolean getLocalFile(ArrayList<ForexNewsItem> newsItemsList){
+        Boolean isBol=null;
+        // Load  items from JSON
+        String readJsonData1 = StorageUtils.readJsonFromFile(getContext(), FILE_NAME);
         // Parse JSON data
-        Type listType = new TypeToken<List<ForexNewsItem>>() {}.getType();
-        List<ForexNewsItem> newsloading = new Gson().fromJson(readJsonData, listType);
+        Type listType2 = new TypeToken<List<ForexNewsItem>>() {}.getType();
+        ArrayList<ForexNewsItem> newsItems=new Gson().fromJson(readJsonData1, listType2);
 
-        if (newsloading == null) {
-            MakeConnection();
+
+
+        if(newsItems==null){
+            newsItems=new ArrayList<ForexNewsItem>();
+            // save to local
+            Gson gson = new Gson();
+            String jsonData = gson.toJson(newsItems);
+            StorageUtils.writeJsonToFile(getContext(), FILE_NAME, jsonData);
+            isBol=false;
+        }else {
+            newsItemsList.addAll(newsItems);
+            forexNewsAdapter.notifyDataSetChanged();
             readFine();
+            isBol= true;
+
         }
-
-
+        return isBol;
     }
+
 
 }

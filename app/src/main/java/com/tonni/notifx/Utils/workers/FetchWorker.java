@@ -4,7 +4,9 @@ package com.tonni.notifx.Utils.workers;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -22,6 +24,7 @@ import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflec
 import com.google.gson.Gson;
 import com.tonni.notifx.R;
 import com.tonni.notifx.Utils.Storage.StorageUtils;
+import com.tonni.notifx.Utils.receivers.NotificationActionReceiver;
 import com.tonni.notifx.api.ApiResponse;
 import com.tonni.notifx.models.ApiTurn;
 import com.tonni.notifx.models.PendingPrice;
@@ -31,7 +34,9 @@ import org.json.JSONObject;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class FetchWorker extends Worker {
 
@@ -39,11 +44,18 @@ public class FetchWorker extends Worker {
     private static final String URL2 = "https://marketdata.tradermade.com/api/v1/live";
     private static final String CURRENCY = "USDJPY,USA30,GBPUSD,EURUSD,XAUUSD,USDCAD,USDCHF,EURJPY,GBPJPY,NZDCAD,CHFJPY,CADCHF,CADJPY";
     private static final String API_KEY = "HvHNPZP8zjXZuRYwAj-S";
-    private static final String API_KEY2 = "HvHNPZP8zjXZuRYwAj-S";
+    private static final String API_KEY2 = "BlQh6jBbdKB_F_31ZtKL";
 
     private static final String FILE_NAME_PENDING = "pending.json";
     private static final String FILE_NAME_TURN = "turnApi.json";
+    private static final String FILE_NAME_FILLED_LOCAL = "filled.json";
+    private static final String FILE_NAME_PENDING_FOREX_LOCAL = "pending_forex.json";
+    private static final String FILE_NAME_PENDING_LOCAL = "pending_pending.json";
+
     private static final int MAX_PRIORITY = 10;
+    private String queryUrl = URL + "?currency=" + CURRENCY + "&api_key=" + API_KEY;
+    private String queryUrl_1 = URL + "?currency=" + CURRENCY + "&api_key=" + API_KEY;
+    private String queryUrl_2 = URL + "?currency=" + CURRENCY + "&api_key=" + API_KEY2;
 
     private Context context;
 
@@ -62,28 +74,81 @@ public class FetchWorker extends Worker {
 
     private void fetchData() {
 
+        Calendar calendar = Calendar.getInstance();
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
+
+
+        // Define the days of the week to check (Monday to Friday in this case)
+        boolean isInWeekDays = dayOfWeek >= Calendar.MONDAY && dayOfWeek <= Calendar.FRIDAY;
+
+        // Define the time range to check (6:00 AM to 10:00 PM)
+        boolean isInTimeRange = hourOfDay >= 6 && hourOfDay < 22;
+
+
+        if (isInWeekDays && isInTimeRange) {
+            // Call the method
+
+            // Load Forex news items from JSON
+            String readJsonData_valid = StorageUtils.readJsonFromFile(context, FILE_NAME_PENDING);
+
+            // Parse JSON data
+            Type listType = new TypeToken<List<PendingPrice>>() {
+            }.getType();
+            List<PendingPrice> testingValiditityList = new Gson().fromJson(readJsonData_valid, listType);
+            ArrayList<String> testingValiditityList_string = new ArrayList<>();
+
+
+            if (testingValiditityList == null) {
+                testingValiditityList = new ArrayList<PendingPrice>();
+            }
+            int getWaitingList = 0;
+
+            for (int i = 0; i < testingValiditityList.size(); i++) {
+                if (testingValiditityList.get(i).getFilled().equals("Not")) {
+                    getWaitingList++;
+                    testingValiditityList_string.add(testingValiditityList.get(i).getPair());
+
+                }
+            }
+
+            String new_currency_string=new_pairs_to_api(testingValiditityList_string);
+            queryUrl = URL + "?currency=" + new_currency_string + "&api_key=" + API_KEY;
+            queryUrl_1 = URL + "?currency=" + new_currency_string + "&api_key=" + API_KEY;
+            queryUrl_2 = URL + "?currency=" + new_currency_string + "&api_key=" + API_KEY2;
+
+
+            if (getWaitingList > 0) {
+
         RequestQueue requestQueue = Volley.newRequestQueue(context);
-        String queryUrl = URL + "?currency=" + CURRENCY + "&api_key=" + API_KEY;
+
 
         //get turn
         // Read JSON data from internal storage
         String readJsonData_turn = StorageUtils.readJsonFromFile(context, FILE_NAME_TURN);
+        String readJsonData_filled = StorageUtils.readJsonFromFile(context, FILE_NAME_FILLED_LOCAL);
         // Parse JSON data
         Type listType_turn = new TypeToken<List<ApiTurn>>() {
         }.getType();
+        Type listType_filled = new TypeToken<List<PendingPrice>>() {
+                }.getType();
         List<ApiTurn> turnList = new Gson().fromJson(readJsonData_turn, listType_turn);
+        ArrayList<PendingPrice> filled_list = new Gson().fromJson(readJsonData_filled, listType_filled);
 
+        if (filled_list==null){
+            filled_list=new ArrayList<>();
+        }
         if (turnList==null){
             turnList=new ArrayList<>();
             turnList.add(0,new ApiTurn(1));
         }else if(turnList.get(0).getTurn_number()== 1){
             //make use of one api and flip for the next turn
             turnList.add(0,new ApiTurn(2));
-            queryUrl = URL + "?currency=" + CURRENCY + "&api_key=" + API_KEY;
+            queryUrl = queryUrl_1;
         }else if(turnList.get(0).getTurn_number() == 2){
             //make use of one api and flip for the next turn
             turnList.add(0,new ApiTurn(1));
-            queryUrl = URL + "?currency=" + CURRENCY + "&api_key=" + API_KEY2;
+            queryUrl = queryUrl_2;
         }
 
 
@@ -92,7 +157,8 @@ public class FetchWorker extends Worker {
 
 
         List<ApiTurn> finalTurnList = turnList;
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                ArrayList<PendingPrice> finalFilled_list = filled_list;
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                 Request.Method.GET,
                 queryUrl,
                 null,
@@ -114,7 +180,7 @@ public class FetchWorker extends Worker {
                         Type listType = new TypeToken<List<PendingPrice>>() {
                         }.getType();
                         List<PendingPrice> pendingList = new Gson().fromJson(readJsonData, listType);
-                        List<PendingPrice> pendingList_copy = new ArrayList<>(pendingList);
+                        ArrayList<PendingPrice> pendingList_copy = new ArrayList<>(pendingList);
 
                         for (int i = 0; i < apiResponse.getQuotes().size(); i++) {
                             Log.d("MainActivity-Qutoes", apiResponse.getQuotes().get(i).toString());
@@ -151,7 +217,15 @@ public class FetchWorker extends Worker {
                                                     if (price > price_) {
                                                         pendingList_copy.get(j).setFilled("Yes");
                                                         pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+                                                        finalFilled_list.add(pendingList_copy.get(j));
                                                         Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
+
+                                                        // Create an intent for the stop button
+                                                        Intent stopIntent1 = new Intent(context, NotificationActionReceiver.class);
+                                                        stopIntent1.setAction("WATCH_LIST_ALERT");
+                                                        int id_=(int) System.currentTimeMillis();
+                                                        stopIntent1.putExtra("id",id_);
+                                                        PendingIntent stopPendingIntent = PendingIntent.getBroadcast(context, 0, stopIntent1, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
                                                         // Create notification
                                                         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -163,13 +237,17 @@ public class FetchWorker extends Worker {
                                                         }
 
                                                         Notification notification = new NotificationCompat.Builder(context, channelId)
-                                                                .setContentTitle("Watch list[" + pendingList.get(j).getPair() + "]")
-                                                                .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
-                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
-                                                                .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
+                                                                .setContentTitle("Watch list [" + pendingList.get(j).getPair() + "]")
+                                                                .setContentText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
+                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
+                                                                .setSmallIcon(R.drawable.notif)
+                                                                .addAction(R.drawable.ic_baseline_delete_forever_24, "Remove", stopPendingIntent) // Add stop button to notification
+                                                                .setOngoing(true) // Make the notification ongoing
+                                                                .setAutoCancel(false)
+                                                                .setVibrate(new long[]{0, 1000, 1000, 1000, 1000})
                                                                 .build();
 
-                                                        notificationManager.notify((int) System.currentTimeMillis(), notification);
+                                                        notificationManager.notify(id_, notification);
                                                         // Display the response using Log
                                                         Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                     }
@@ -177,7 +255,15 @@ public class FetchWorker extends Worker {
                                                     if (price < price_) {
                                                         pendingList_copy.get(j).setFilled("Yes");
                                                         pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+                                                        finalFilled_list.add(pendingList_copy.get(j));
                                                         Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
+
+                                                        // Create an intent for the stop button
+                                                        Intent stopIntent2 = new Intent(context, NotificationActionReceiver.class);
+                                                        stopIntent2.setAction("WATCH_LIST_ALERT");
+                                                        int id_=(int) System.currentTimeMillis();
+                                                        stopIntent2.putExtra("id",id_);
+                                                        PendingIntent stopPendingIntent = PendingIntent.getBroadcast(context, 0, stopIntent2, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
                                                         // Create notification
                                                         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -189,13 +275,17 @@ public class FetchWorker extends Worker {
                                                         }
 
                                                         Notification notification = new NotificationCompat.Builder(context, channelId)
-                                                                .setContentTitle("Watch list[" + pendingList.get(j).getPair() + "]")
-                                                                .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
-                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
-                                                                .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
+                                                                .setContentTitle("Watch list [" + pendingList.get(j).getPair() + "]")
+                                                                .setContentText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
+                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
+                                                                .setSmallIcon(R.drawable.notif)
+                                                                .addAction(R.drawable.ic_baseline_delete_forever_24, "Remove", stopPendingIntent) // Add stop button to notification
+                                                                .setOngoing(true) // Make the notification ongoing
+                                                                .setAutoCancel(false)
+                                                                .setVibrate(new long[]{0, 1000, 1000, 1000, 1000})
                                                                 .build();
 
-                                                        notificationManager.notify((int) System.currentTimeMillis(), notification);
+                                                        notificationManager.notify(id_, notification);
                                                         // Display the response using Log
                                                         Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                     }
@@ -204,7 +294,12 @@ public class FetchWorker extends Worker {
 
                                             }
 
+
                                         }
+
+                                        Intent intent= new Intent("android.intent.action.WithInMain");
+                                        context.sendBroadcast(intent);
+
 
                                     } else if (apiResponse.getQuotes().get(i).getInstrument() != null) {
                                         String pair = apiResponse.getQuotes().get(i).getInstrument();
@@ -224,7 +319,15 @@ public class FetchWorker extends Worker {
                                                     if (price > price_) {
                                                         pendingList_copy.get(j).setFilled("Yes");
                                                         pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+                                                        finalFilled_list.add(pendingList_copy.get(j));
                                                         Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
+                                                        int id_=(int) System.currentTimeMillis();
+                                                        // Create an intent for the stop button
+                                                        Intent stopIntent = new Intent(context, NotificationActionReceiver.class);
+                                                        stopIntent.setAction("WATCH_LIST_ALERT");
+                                                        stopIntent.putExtra("id",id_);
+                                                        PendingIntent stopPendingIntent = PendingIntent.getBroadcast(context, 0, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
 
                                                         // Create notification
                                                         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -236,13 +339,17 @@ public class FetchWorker extends Worker {
                                                         }
 
                                                         Notification notification = new NotificationCompat.Builder(context, channelId)
-                                                                .setContentTitle("Watch list[" + pendingList.get(j).getPair() + "]")
-                                                                .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
-                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
-                                                                .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
+                                                                .setContentTitle("Watch list [" + pendingList.get(j).getPair() + "]")
+                                                                .setContentText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
+                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
+                                                                .setSmallIcon(R.drawable.notif)
+                                                                .setAutoCancel(false)
+                                                                .setVibrate(new long[]{0, 1000, 1000, 1000, 1000})
+                                                                .addAction(R.drawable.ic_baseline_delete_forever_24, "Remove", stopPendingIntent) // Add stop button to notification
+                                                                .setOngoing(true) // Make the notification ongoing
                                                                 .build();
 
-                                                        notificationManager.notify((int) System.currentTimeMillis(), notification);
+                                                        notificationManager.notify(id_, notification);
                                                         // Display the response using Log
                                                         Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                     }
@@ -250,7 +357,15 @@ public class FetchWorker extends Worker {
                                                     if (price < price_) {
                                                         pendingList_copy.get(j).setFilled("Yes");
                                                         pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+                                                        finalFilled_list.add(pendingList_copy.get(j));
                                                         Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
+
+                                                        // Create an intent for the stop button
+                                                        Intent stopIntent = new Intent(context, NotificationActionReceiver.class);
+                                                        stopIntent.setAction("WATCH_LIST_ALERT");
+                                                        int id_=(int) System.currentTimeMillis();
+                                                        stopIntent.putExtra("id",id_);
+                                                        PendingIntent stopPendingIntent = PendingIntent.getBroadcast(context, 0, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
                                                         // Create notification
                                                         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -262,13 +377,17 @@ public class FetchWorker extends Worker {
                                                         }
 
                                                         Notification notification = new NotificationCompat.Builder(context, channelId)
-                                                                .setContentTitle("Watch list[" + pendingList.get(j).getPair() + "]")
-                                                                .setContentText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
-                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price to moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
-                                                                .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
+                                                                .setContentTitle("Watch list [" + pendingList.get(j).getPair() + "]")
+                                                                .setContentText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
+                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
+                                                                .setSmallIcon(R.drawable.notif)
+                                                                .addAction(R.drawable.ic_baseline_delete_forever_24, "Remove", stopPendingIntent) // Add stop button to notification
+                                                                .setVibrate(new long[]{0, 1000, 1000, 1000, 1000})
+                                                                .setOngoing(true) // Make the notification ongoing
+                                                                .setAutoCancel(false)
                                                                 .build();
 
-                                                        notificationManager.notify((int) System.currentTimeMillis(), notification);
+                                                        notificationManager.notify(id_, notification);
                                                         // Display the response using Log
                                                         Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                     }
@@ -283,12 +402,16 @@ public class FetchWorker extends Worker {
 
                                 }
 
+                            }else {
+
                             }
 
 
                             addNewPending(pendingList_copy, context);
                             String jsonData_turn_list = gson.toJson(finalTurnList);
                             StorageUtils.writeJsonToFile(context, FILE_NAME_TURN, jsonData_turn_list);
+                            String jsonData_filled_list = gson.toJson(finalFilled_list);
+                            StorageUtils.writeJsonToFile(context, FILE_NAME_FILLED_LOCAL, jsonData_filled_list);
                         }
 
                 },
@@ -303,6 +426,7 @@ public class FetchWorker extends Worker {
                         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                         String channelId = "Api 10 interval data";
                         String channelName = "10 Minute Api Notification";
+
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                             NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
                             notificationManager.createNotificationChannel(channel);
@@ -313,59 +437,99 @@ public class FetchWorker extends Worker {
                                 .setContentText("Failed to get watch list data")
                                 .setPriority(MAX_PRIORITY)
                                 .setStyle(new NotificationCompat.BigTextStyle().bigText("Failed to get Api data".toString())) // For longer text
-                                .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
+                                .setSmallIcon(R.drawable.notif)
+                                .setVibrate(new long[]{0, 1000, 1000, 1000, 1000})
                                 .build();
 
-                        notificationManager.notify((int) System.currentTimeMillis(), notification);
+                        notificationManager.notify(1, notification);
 
                     }
                 }
         );
 
 
-        // Load Forex news items from JSON
-        String readJsonData_valid = StorageUtils.readJsonFromFile(context, FILE_NAME_PENDING);
-
-        // Parse JSON data
-        Type listType = new TypeToken<List<PendingPrice>>() {
-        }.getType();
-        List<PendingPrice> testingValiditityList = new Gson().fromJson(readJsonData_valid, listType);
 
 
-        if(testingValiditityList == null){
-            testingValiditityList =new ArrayList<PendingPrice>();
-        }
-        int getWaitingList=0;
-
-        for (int i = 0; i < testingValiditityList.size(); i++) {
-            if(testingValiditityList.get(i).getFilled().equals("Not")){
-                getWaitingList++;
+                // Add the request to the RequestQueue
+                requestQueue.add(jsonObjectRequest);
             }
-        }
-
-
-
-        if(getWaitingList>0) {
-
-            // Add the request to the RequestQueue
-            requestQueue.add(jsonObjectRequest);
         }
 
 
     }
 
-    private void addNewPending(List<PendingPrice> list, Context context) {
+    private void addNewPending(ArrayList<PendingPrice> list, Context context) {
 
-        List<PendingPrice> empty_list = new ArrayList<>();
+        ArrayList<PendingPrice> empty_list = new ArrayList<>();
+        ArrayList<PendingPrice> final_list = new ArrayList<>();
+
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getFilled().equals("Not")){
+                final_list.add(list.get(i));
+            }
+        }
 
         Gson gson = new Gson();
         String jsonData_ = gson.toJson(empty_list);
         StorageUtils.writeJsonToFile(context, FILE_NAME_PENDING, jsonData_);
+        StorageUtils.writeJsonToFile(context, FILE_NAME_PENDING_FOREX_LOCAL, jsonData_);
+        StorageUtils.writeJsonToFile(context, FILE_NAME_FILLED_LOCAL, jsonData_);
+        StorageUtils.writeJsonToFile(context, FILE_NAME_PENDING_LOCAL, jsonData_);
 
-        String jsonData = gson.toJson(list);
+
+        String jsonData = gson.toJson(final_list);
         StorageUtils.writeJsonToFile(context, FILE_NAME_PENDING, jsonData);
+        StorageUtils.writeJsonToFile(context, FILE_NAME_PENDING_FOREX_LOCAL, jsonData);
+        StorageUtils.writeJsonToFile(context, FILE_NAME_FILLED_LOCAL, jsonData);
+        StorageUtils.writeJsonToFile(context, FILE_NAME_PENDING_LOCAL, jsonData);
 
 
+    }
+
+
+    public static String new_pairs_to_api(ArrayList<String> _list){
+        Set<String> linkedHashSet = new LinkedHashSet<>(_list);
+        ArrayList<String> pair_to_Add_list=new ArrayList<>();
+        int pair_to_Add_num=0;
+        pair_to_Add_list.add("NZDJPY");
+        pair_to_Add_list.add("AUDJPY");
+        pair_to_Add_list.add("GBPAUD");
+        pair_to_Add_list.add("GBPNZD");
+        pair_to_Add_list.add("AUDUSD");
+
+
+        try {
+            pair_to_Add_num= (int) (4*Math.random());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
+        // Iterating over elements
+        String querry_pairs="";
+        int last_element=linkedHashSet.size()-1;
+        ArrayList<String> unique_list=new ArrayList<>();
+        unique_list.addAll(linkedHashSet);
+        for (int pair_index = 0; pair_index < linkedHashSet.size(); pair_index++) {
+            if(last_element==pair_index){
+                querry_pairs+=unique_list.get(pair_index);
+            }else {
+                querry_pairs+=unique_list.get(pair_index)+",";
+            }
+
+        }
+        if(pair_to_Add_num%2==0){
+            querry_pairs=pair_to_Add_list.get(pair_to_Add_num)+","+querry_pairs;
+        }else {
+            querry_pairs=querry_pairs+","+pair_to_Add_list.get(pair_to_Add_num);
+        }
+
+
+
+
+
+
+        return querry_pairs;
     }
 
 }

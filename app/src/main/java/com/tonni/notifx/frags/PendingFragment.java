@@ -14,7 +14,8 @@ import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflec
 import com.google.gson.Gson;
 import com.tonni.notifx.R;
 import com.tonni.notifx.Utils.Storage.StorageUtils;
-import com.tonni.notifx.models.TrackRefresh;
+import com.tonni.notifx.inter.MainActivityInterface;
+import com.tonni.notifx.inter.PendingInterface;
 import com.tonni.notifx.adapter.PendingAdapter;
 import com.tonni.notifx.inter.RefreshableFragment;
 import com.tonni.notifx.models.PendingPrice;
@@ -22,82 +23,142 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PendingFragment extends Fragment implements RefreshableFragment {
+public class PendingFragment extends Fragment implements RefreshableFragment, PendingInterface {
 
+    private MainActivityInterface mainActivityInterface;
     private RecyclerView recyclerView;
     private PendingAdapter pendingAdapter;
     private static final String FILE_NAME_PENDING = "pending.json";
-    private List<PendingPrice> pendingPrices = new ArrayList<>();
+    private ArrayList<PendingPrice> pendingPrices = new ArrayList<>();
+    private static final String FILE_NAME_PENDING_LOCAL = "pending_pending.json";
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_pending, container, false);
+
+
+        try {
+            mainActivityInterface = (MainActivityInterface) getContext();
+        } catch (ClassCastException e) {
+            throw new ClassCastException(getContext().toString() + " must implement MainActivityInterface");
+        }
         recyclerView = view.findViewById(R.id.recycler_view_pending);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+
+        pendingPrices= new ArrayList<>();
 
         pendingAdapter = new PendingAdapter(this, pendingPrices,getContext());
         recyclerView.setAdapter(pendingAdapter);
 
-        readPending(); // This will now update the list and notify the adapter
+       getLocalFile(pendingPrices);
         return view;
     }
 
-    private void readPending() {
-        // Load Forex news items from JSON
-        String readJsonData = StorageUtils.readJsonFromFile(getContext(), FILE_NAME_PENDING);
-        Log.d("PendingFragment", "Read JSON: " + readJsonData);
-
-        // Parse JSON data
-        Type listType = new TypeToken<List<PendingPrice>>() {}.getType();
-        List<PendingPrice> loadedPendingPrices = new Gson().fromJson(readJsonData, listType);
-        List<PendingPrice> loadedPendingPrices_new=new ArrayList<>();
-
-
-        if (loadedPendingPrices == null) {
-            loadedPendingPrices = new ArrayList<>();
-        }else {
-            for (int i = 0; i < loadedPendingPrices.size(); i++) {
-                if (!loadedPendingPrices.get(i).getFilled().equals("Yes") ) {
-                    loadedPendingPrices_new.add(loadedPendingPrices.get(i));
-                }
-            }
-
-        }
-
-        pendingPrices.clear();
-        pendingPrices.addAll(loadedPendingPrices_new);
-        pendingAdapter.notifyDataSetChanged();
-    }
 
     @Override
     public void refresh() {
         Log.d("PendingFragment", "Refreshing data...");
 
-
-        if (TrackRefresh.getPendingFrag()==0){
-            TrackRefresh.setPendingFrag(1);
-        }else {
-           readPending(); // This method already clears the list and notifies the adapter
-
-        }
     }
 
-    public void deletePendingPos(PendingPrice pendingPrice, int pos){
+
+    public void deletePendingPos( int pos){
         pendingPrices.remove(pos);
         pendingAdapter.notifyItemRemoved(pos);
-        addNewPending();
+        //update forex fragment
+        mainActivityInterface.UpdateForexMainActivity().refreshUIFromPending(pos);
+        saved_files();
     }
 
 
-    private void addNewPending(){
+    @Override
+    public void UpdateUI() {
+
+    }
+
+    @Override
+    public void refreshUIFromForex(PendingPrice pendingPrice) {
+        //Add the item to the list and update the adapter
+        int pos=pendingPrices.size();
+        pendingPrices.add(pendingPrice);
+        pendingAdapter.notifyItemInserted(pos);
+        saved_file();
+    }
+
+
+
+    public boolean getLocalFile(ArrayList<PendingPrice> pendingPricesForex){
+        // Load  items from JSON
+        String readJsonData1 = StorageUtils.readJsonFromFile(getContext(), FILE_NAME_PENDING_LOCAL);
+        // Parse JSON data
+        Type listType2 = new TypeToken<List<PendingPrice>>() {}.getType();
+        ArrayList<PendingPrice> pendingPrices_=new Gson().fromJson(readJsonData1, listType2);
+
+
+
+        if(pendingPrices_==null){
+            pendingPrices_=new ArrayList<PendingPrice>();
+            pendingPricesForex=new ArrayList<>();
+        }
+
+        pendingPricesForex.addAll(pendingPrices_);
+        pendingAdapter.notifyDataSetChanged();
+
+        return true;
+    }
+
+    public void getLocalFile_main(){
+        Log.d("MainActivity-Broadcast", "broadcast pending");
+
+        pendingPrices.clear();
+        // Load  items from JSON
+        String readJsonData1 = StorageUtils.readJsonFromFile(getContext(), FILE_NAME_PENDING_LOCAL);
+        // Parse JSON data
+        Type listType2 = new TypeToken<List<PendingPrice>>() {}.getType();
+        ArrayList<PendingPrice> pendingPrices_=new Gson().fromJson(readJsonData1, listType2);
+
+
+
+        if(pendingPrices_==null){
+            pendingPrices_=new ArrayList<PendingPrice>();
+        }
+
+        pendingPrices.addAll(pendingPrices_);
+        pendingPrices.addAll(pendingPrices_);
+        Log.d("MainActivity-Broadcast", "broadcast pending =="+String.valueOf(pendingPrices.size()));
+        pendingAdapter.notifyDataSetChanged();
+
+    }
+
+    public  void saved_file(){
         Gson gson = new Gson();
-        List<PendingPrice> pendingPricesClear=new ArrayList<>();
-        String jsonData_ = gson.toJson(pendingPricesClear);
+        //CLEAR
+        ArrayList<PendingPrice> clear_list=new ArrayList<>();
+        String jsonData_ = gson.toJson(clear_list);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData_);
+
+        // SAVE DATA
+        String jsonData = gson.toJson(pendingPrices);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData);
+
+    }
+
+
+    public  void saved_files(){
+        Gson gson = new Gson();
+        //CLEAR
+        ArrayList<PendingPrice> clear_list=new ArrayList<>();
+        String jsonData_ = gson.toJson(clear_list);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData_);
         StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING, jsonData_);
 
-//        forexNewsItems=null;
+        // SAVE DATA
         String jsonData = gson.toJson(pendingPrices);
         StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING, jsonData);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData);
 
     }
+
+
 }

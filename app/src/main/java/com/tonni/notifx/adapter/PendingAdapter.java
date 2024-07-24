@@ -78,7 +78,7 @@ public class PendingAdapter extends RecyclerView.Adapter<PendingAdapter.ViewHold
                                 public void onClick(DialogInterface dialog, int which) {
 
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                            pendingFragment.deletePendingPos(pendingPrice, holder.getAdapterPosition());
+                                            pendingFragment.deletePendingPos( holder.getAdapterPosition());
                                         }
                                 }
                             })
