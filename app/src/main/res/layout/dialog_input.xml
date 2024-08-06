@@ -28,12 +28,12 @@
         android:textColorHint="@color/suunyg"
         android:textSize="18sp"
         android:padding="4dp"
-        android:textCursorDrawable="@color/white"
+        android:textCursorDrawable="@drawable/cursor_white"
         android:cursorVisible="true"
         android:background="@drawable/custom_style"
         android:minHeight="26sp"
         android:textColor="@color/poppy"
-        android:layout_height="35dp"
+        android:layout_height="40dp"
         android:hint="Add a note ..."
         android:inputType="text"/>
 
@@ -55,7 +55,7 @@
         android:background="@drawable/custom_style"
         android:minHeight="26sp"
         android:textSize="18sp"
-        android:layout_height="35dp"
+        android:layout_height="40dp"
         android:hint="price level ...."
         android:inputType="numberDecimal"/>
     <LinearLayout
@@ -89,6 +89,24 @@
             android:layout_height="wrap_content"
             android:textColor="@color/uclag"
             android:text="below" />
+
+        <RadioButton
+            android:id="@+id/breakup"
+            android:layout_width="wrap_content"
+            android:textSize="13sp"
+            android:buttonTint="@color/uclag"
+            android:layout_height="wrap_content"
+            android:textColor="@color/uclag"
+            android:text="breakup" />
+
+        <RadioButton
+            android:id="@+id/breakdown"
+            android:layout_width="wrap_content"
+            android:textSize="13sp"
+            android:buttonTint="@color/uclag"
+            android:layout_height="wrap_content"
+            android:textColor="@color/uclag"
+            android:text="breakdown" />
     </RadioGroup>
 
     <!-- Add custom buttons for Positive and Negative actions -->

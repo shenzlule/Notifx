@@ -18,6 +18,8 @@ import com.tonni.notifx.R;
 import com.tonni.notifx.frags.PendingFragment;
 import com.tonni.notifx.models.PendingPrice;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Locale;
 public class PendingAdapter extends RecyclerView.Adapter<PendingAdapter.ViewHolder> {
 
     private PendingFragment pendingFragment;
+    private static  final DecimalFormat decfor = new DecimalFormat("0.0");
     List<PendingPrice> pendingPrices_list;
     Context context;
 
@@ -48,16 +51,18 @@ public class PendingAdapter extends RecyclerView.Adapter<PendingAdapter.ViewHold
 
         if (pendingPrice.getFilled().equals("Not")) {
             // Assuming pendingPrice.getDate() returns the date as a string in milliseconds
-            long dateMillis = Long.parseLong(pendingPrice.getDate());
-            long currentMillis = System.currentTimeMillis();
-            long elapsedMillis = currentMillis - dateMillis;
-            long elapsedHours = elapsedMillis / (1000 * 60 * 60);
+            double dateMillis = Long.parseLong(pendingPrice.getDate());
+            double currentMillis = System.currentTimeMillis();
+            double elapsedMillis = currentMillis - dateMillis;
+            double elapsedHours = elapsedMillis / (1000 * 60 * 60);
+            decfor.setRoundingMode(RoundingMode.UP);
+
 
             holder.currencyPair.setText(pendingPrice.getPair());
             holder.price.setText("Price: " + String.valueOf(pendingPrice.getPrice()));
             holder.pending_mar_notes.setText(String.valueOf(pendingPrice.getNote()));
             holder.date.setText(String.valueOf("Date: " + convertMillisToDateString(Long.parseLong(pendingPrice.getDate()))));
-            holder.elp.setText(String.valueOf("Elapsed hours: " + elapsedHours));
+            holder.elp.setText(String.valueOf("Elapsed hours: " + decfor.format(elapsedHours)));
             holder.pending_mar_notes.setSelected(true);
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {

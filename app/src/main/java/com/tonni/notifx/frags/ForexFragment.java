@@ -39,6 +39,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import es.dmoral.toasty.Toasty;
+
 public class ForexFragment extends Fragment implements RefreshableFragment, ForexCurrencyInterface {
 
     private MainActivityInterface mainActivityInterface;
@@ -153,6 +155,11 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
             RadioButton dirRadioButton = dialogView.findViewById(dirId.get());
 
             String  dirText = dirRadioButton.getText().toString();
+            if (dirText.equals("breakup")){
+                dirText="above";
+            }else if (dirText.equals("breakdown")){
+                dirText="below";
+            }
 
             if (notesInputText.isEmpty()) {
                 Toast.makeText(getContext(), "Note cannot be empty", Toast.LENGTH_SHORT).show();
@@ -174,7 +181,7 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
                 addNewPending(position, formattedPriceInput, notesInputText,
                         pair_,
                         String.valueOf(calendar.getTimeInMillis()),dirText,pair_v);
-                Toast.makeText(getContext(), "Input: " + formattedPriceInput+dirText +" "+notes_input.getText().toString(), Toast.LENGTH_SHORT).show();
+                Toasty.info(getContext(), "Input: " + formattedPriceInput+dirText +" "+notes_input.getText().toString() , Toast.LENGTH_SHORT, true).show();
 
             } catch (NumberFormatException e) {
                 Toast.makeText(getContext(), "Invalid price input", Toast.LENGTH_SHORT).show();
@@ -291,6 +298,8 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
             currencies.add(new ForexCurrency("CAD","CHF",  0,0,5));
             currencies.add(new ForexCurrency("CHF","JPY",  0,0,3));
             currencies.add(new ForexCurrency("NZD","CAD",  0,0,5));
+            currencies.add(new ForexCurrency("XAG","USD",  0,0,3));
+            currencies.add(new ForexCurrency("OIL","@",  0,0,3));
 
             // save to local
             Gson gson = new Gson();

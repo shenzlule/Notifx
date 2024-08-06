@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -17,10 +18,14 @@ import com.tonni.notifx.R;
 import com.tonni.notifx.frags.FilledFragment;
 import com.tonni.notifx.models.PendingPrice;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import es.dmoral.toasty.Toasty;
 
 public class FilledAdapter extends RecyclerView.Adapter<FilledAdapter.ViewHolder> {
 
@@ -28,6 +33,7 @@ public class FilledAdapter extends RecyclerView.Adapter<FilledAdapter.ViewHolder
     List<PendingPrice> filledPrices_list;
     Context context;
     FilledFragment filledFragment;
+    private static  final DecimalFormat decfor = new DecimalFormat("0.0");
 
     public FilledAdapter(FilledFragment filledFragment,List<PendingPrice> pendingPrices, Context context) {
         this.filledPrices_list =pendingPrices;
@@ -51,16 +57,26 @@ public class FilledAdapter extends RecyclerView.Adapter<FilledAdapter.ViewHolder
 
         if (pendingPrice.getFilled().equals("Yes")) {
             // Assuming pendingPrice.getDate() returns the date as a string in milliseconds
-            long dateMillis = Long.parseLong(pendingPrice.getDate_filled());
-            long currentMillis = System.currentTimeMillis();
-            long elapsedMillis = currentMillis - dateMillis;
-            long elapsedHours = elapsedMillis / (1000 * 60 * 60);
+            // Assuming pendingPrice.getDate() returns the date as a string in milliseconds
+            double dateMillis = Long.parseLong(pendingPrice.getDate_filled());
+            double currentMillis = System.currentTimeMillis();
+            double elapsedMillis = currentMillis - dateMillis;
+            double elapsedHours = elapsedMillis / ((1000 * 60 * 60));
+            decfor.setRoundingMode(RoundingMode.UP);
+
             holder.currencyPair.setText(pendingPrice.getPair());
             holder.price.setText("Price: " + String.valueOf(pendingPrice.getPrice()));
             holder.pending_mar_notes.setText(String.valueOf(pendingPrice.getNote()));
             holder.date.setText(String.valueOf("Date: " + convertMillisToDateString(Long.parseLong(pendingPrice.getDate_filled()))));
             holder.pending_mar_notes.setSelected(true);
-            holder.elp.setText(String.valueOf("Elapsed hours: " + elapsedHours));
+            holder.elp.setText(String.valueOf("Elapsed hours: " +  decfor.format(elapsedHours)));
+
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toasty.info(context, String.valueOf(pendingPrice.getDate_filled().toString()), Toast.LENGTH_SHORT, true).show();
+                }
+            });
             holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {

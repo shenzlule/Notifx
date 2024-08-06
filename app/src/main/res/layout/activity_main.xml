@@ -12,7 +12,50 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:layout_width="wrap_content"
+                android:gravity="center_horizontal"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:textSize="26sp"
+                android:text="Notifx"
+                android:textColor="@color/white"
+                android:textStyle="bold"/>
+            <ImageView
+                android:layout_marginHorizontal="6dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@drawable/ic_baseline_save_alt_24"
+
+                android:id="@+id/btnSaveJson"/>
+
+            <ProgressBar
+                android:id="@+id/progress"
+                android:layout_width="25dp"
+                android:background="@drawable/progress_bg"
+                android:layout_height="25dp"
+                android:layout_marginRight="10dp"
+                android:visibility="gone"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"/>
+            <ImageView
+                android:layout_marginHorizontal="6dp"
+               android:layout_toLeftOf="@+id/btnSaveJson"
+                android:layout_centerVertical="true"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@drawable/ic_baseline_file_open_24"
+
+                android:id="@+id/btnOpenFolder"/>
+        </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
 
 
     <com.google.android.material.tabs.TabLayout

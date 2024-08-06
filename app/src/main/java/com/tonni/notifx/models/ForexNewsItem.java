@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class ForexNewsItem {
+    private long id;
     private String time;
     private String name;
     private String currency;
@@ -15,13 +16,22 @@ public class ForexNewsItem {
     private String isAlarm;
 
 
-    public ForexNewsItem(String time, String name, String currency, String status, String is_done, String isAlarm) {
+    public ForexNewsItem(long id, String time, String name, String currency, String status, String is_done, String isAlarm) {
+        this.id = id;
         this.time = time;
         this.name = name;
         this.currency = currency;
         this.status = status;
         this.is_done = is_done;
         this.isAlarm = isAlarm;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getTime() {
@@ -88,7 +98,95 @@ public class ForexNewsItem {
             calendar.set(Calendar.HOUR_OF_DAY, 9);  // Set to 9 AM for all-day events
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));  // Set current year
-        } else {
+        }else if (time.contains("Day 1")) {
+            // Parse all-day event format
+            sdf = new SimpleDateFormat("EEE MMM dd", Locale.getDefault());
+            Date date = sdf.parse(time.split("-")[0].trim());
+
+            // Set current year
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 9);  // Set to 9 AM for all-day events
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));  // Set current year
+        }
+        else if (time.contains("Day 2")) {
+            // Parse all-day event format
+            sdf = new SimpleDateFormat("EEE MMM dd", Locale.getDefault());
+            Date date = sdf.parse(time.split("-")[0].trim());
+
+            // Set current year
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 9);  // Set to 9 AM for all-day events
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));  // Set current year
+        }
+        else if (time.contains("Day 3")) {
+            // Parse all-day event format
+            sdf = new SimpleDateFormat("EEE MMM dd", Locale.getDefault());
+            Date date = sdf.parse(time.split("-")[0].trim());
+
+            // Set current year
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 9);  // Set to 9 AM for all-day events
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));  // Set current year
+        }
+        else if (time.contains("Day")) {
+            // Parse all-day event format
+            sdf = new SimpleDateFormat("EEE MMM dd", Locale.getDefault());
+            Date date = sdf.parse(time.split("-")[0].trim());
+
+            // Set current year
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 9);  // Set to 9 AM for all-day events
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));  // Set current year
+        }
+        else if (time.contains("Tentative")) {
+            // Parse all-day event format
+            sdf = new SimpleDateFormat("EEE MMM dd", Locale.getDefault());
+            Date date = sdf.parse(time.split("-")[0].trim());
+
+            // Set current year
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 9);  // Set to 9 AM for all-day events
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));  // Set current year
+        }
+        else if (time.contains("th")) {
+            // Parse all-day event format
+            sdf = new SimpleDateFormat("EEE MMM dd", Locale.getDefault());
+            Date date = sdf.parse(time.split("-")[0].trim());
+
+            // Set current year
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 9);  // Set to 9 AM for all-day events
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));  // Set current year
+        }
+        else if (time.contains("nd")) {
+            // Parse all-day event format
+            sdf = new SimpleDateFormat("EEE MMM dd", Locale.getDefault());
+            Date date = sdf.parse(time.split("-")[0].trim());
+
+            // Set current year
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 9);  // Set to 9 AM for all-day events
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));  // Set current year
+        }
+        else if (time.contains("rd")) {
+            // Parse all-day event format
+            sdf = new SimpleDateFormat("EEE MMM dd", Locale.getDefault());
+            Date date = sdf.parse(time.split("-")[0].trim());
+
+            // Set current year
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 9);  // Set to 9 AM for all-day events
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));  // Set current year
+        }
+            else {
             // Parse specific time event format
             sdf = new SimpleDateFormat("EEE MMM dd-h:mma", Locale.getDefault());
             Date date = sdf.parse(time);

@@ -85,6 +85,26 @@ public class FilledFragment extends Fragment implements RefreshableFragment {
 
         return true;
     }
+    public boolean getLocalFile_main(){
+        // Load  items from JSON
+        String readJsonData1 = StorageUtils.readJsonFromFile(getContext(), FILE_NAME_FILLED_LOCAL);
+        // Parse JSON data
+        Type listType2 = new TypeToken<List<PendingPrice>>() {}.getType();
+        ArrayList<PendingPrice> filledPrices_=new Gson().fromJson(readJsonData1, listType2);
+
+
+
+        if(filledPrices_==null){
+            filledPrices_=new ArrayList<PendingPrice>();
+            // save to local
+        }
+
+        filledPrices.clear();
+        filledPrices.addAll(filledPrices_);
+        filledAdapter.notifyDataSetChanged();
+
+        return true;
+    }
 
     public  void saved_file(){
         Gson gson = new Gson();

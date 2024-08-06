@@ -24,18 +24,21 @@ public class NotifyWorker extends Worker {
     public Result doWork() {
         // Create notification
         NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        String channelId = "notify_20_min";
-        String channelName = "20 Minute Notification";
+        String channelId = "notify_10_min";
+        String channelName = "10 Minute Notification";
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
             notificationManager.createNotificationChannel(channel);
         }
 
         Notification notification = new NotificationCompat.Builder(getApplicationContext(), channelId)
                 .setContentTitle("Watch list Check")
-                .setContentText("Fetching data...")
+                .setContentText("Fetching...")
                 .setPriority(MAX_PRIORITY)
-                .setSmallIcon(R.drawable.ic_baseline_circle_notifications_24)
+
+                .setCategory(Notification.CATEGORY_ALARM)
+                .setSmallIcon(R.drawable.notif)
+                .setVibrate(new long[]{1000, 1000, 1000, 1000,1000}) // Initial vibration pattern
                 .build();
 
         notificationManager.notify(1, notification);

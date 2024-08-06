@@ -125,7 +125,6 @@ public class PendingFragment extends Fragment implements RefreshableFragment, Pe
         }
 
         pendingPrices.addAll(pendingPrices_);
-        pendingPrices.addAll(pendingPrices_);
         Log.d("MainActivity-Broadcast", "broadcast pending =="+String.valueOf(pendingPrices.size()));
         pendingAdapter.notifyDataSetChanged();
 

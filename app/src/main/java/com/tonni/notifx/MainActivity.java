@@ -1,24 +1,41 @@
 package com.tonni.notifx;
 
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ReactiveGuide;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.chaquo.python.PyObject;
@@ -26,7 +43,15 @@ import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.tonni.notifx.Utils.Storage.StorageUtils;
+import com.tonni.notifx.Utils.receivers.OverlayReceiver;
 import com.tonni.notifx.Utils.scheduler.NotificationScheduler;
+import com.tonni.notifx.Utils.workers.NewsExpireWorker;
+import com.tonni.notifx.Utils.workers.NewsWorker;
+import com.tonni.notifx.Utils.workers.NotifyWorker;
+import com.tonni.notifx.Utils.workers.setNewsAlarmOnLoadWorker;
 import com.tonni.notifx.frags.FilledFragment;
 import com.tonni.notifx.frags.ForexFragment;
 import com.tonni.notifx.frags.HistoryFragment;
@@ -35,9 +60,15 @@ import com.tonni.notifx.frags.PendingFragment;
 import com.tonni.notifx.inter.MainActivityInterface;
 import com.tonni.notifx.inter.MainReturnForexCurrencyInterface;
 import com.tonni.notifx.inter.RefreshableFragment;
+import com.tonni.notifx.models.NotifAlertModel;
+import com.tonni.notifx.models.PendingPrice;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+
+import es.dmoral.toasty.Toasty;
 
 
 public class MainActivity extends AppCompatActivity implements MainActivityInterface, MainReturnForexCurrencyInterface {
@@ -49,14 +80,30 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private static final int REQUEST_SET_ALARM = 1;
     private static final int REQUEST_CODE_VIBRATE_PERMISSION = 1;
     private static final int REQUEST_CODE_SCHEDULE_EXACT_ALARM_PERMISSION = 2;
-    public Fragment fragmentNews,fragmentFilled,fragmentHistory;
+    private static final String FILE_NAME_PENDING_LOCAL = "pending_pending.json";
+    private static final String FILE_NAME_PENDING_FOREX_LOCAL = "pending_forex.json";
+
+
+    private Handler handler;
+    private Runnable runnable;
+    private ImageView btnSaveJson,btnOpenFolder;
+
+
+    public HistoryFragment fragmentHistory;
+    public NewsFragment fragmentNews;
+    public FilledFragment fragmentFilled;
     public PendingFragment fragmentPending;
+    private ProgressBar progressBar;
     public ForexFragment fragmentPair;
+    private static final int REQUEST_WRITE_STORAGE = 112;
+    private static final int REQUEST_CODE = 101;
 
-    private static final String URL = "https://marketdata.tradermade.com/api/v1/live";
-    private static final String CURRENCY = "USDJPY,GBPUSD,USA30";
-    private static final String API_KEY = "HvHNPZP8zjXZuRYwAj-S";
-
+//    Toasty.custom(yourContext, "I'm a custom Toast", yourIconDrawable, tintColor, duration, withIcon,
+//    shouldTint).show();
+//    Toasty.warning(yourContext, "Beware of the dog.", Toast.LENGTH_SHORT, true).show();
+//    Toasty.info(yourContext, "Here is some info for you.", Toast.LENGTH_SHORT, true).show();
+//    Toasty.success(yourContext, "Success!", Toast.LENGTH_SHORT, true).show();
+//    Toasty.error(yourContext, "This is an error toast.", Toast.LENGTH_SHORT, true).show();
 
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -66,8 +113,37 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
             if(action != null) {
                 switch (action) {
                     case "android.intent.action.WithInMain":
-                        Toast.makeText(context, "Broadast received", Toast.LENGTH_SHORT).show();
+
+//                        handler = new Handler(Looper.getMainLooper());
+//                        runnable = new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                // Task to be executed every 4 second
+//                                btnSaveJson.setVisibility(View.GONE);
+//                                btnOpenFolder.setVisibility(View.GONE);
+//
+//                                progressBar.setVisibility(View.VISIBLE);
+//                                // Re-run the runnable after 4 seconds
+//                                handler.postDelayed(this, 4000);
+//                            }
+//                        };
+//
+//                        // Stop the handler after 4 seconds
+//                        handler.postDelayed(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                progressBar.setVisibility(View.GONE);
+//                                btnSaveJson.setVisibility(View.VISIBLE);
+//                                btnOpenFolder.setVisibility(View.VISIBLE);
+//                                handler.removeCallbacks(runnable);
+//                            }
+//                        }, 4000);
+//
+//                        // Start the handler
+//                        handler.post(runnable);
+
                         Log.d("MainActivity-Broadcast", "Broadcast Received successfully");
+                        Toasty.success(getApplicationContext(), "On watch Success!", Toast.LENGTH_SHORT, true).show();
                         try {
                             fragmentPair.getLocalFile_main();
 
@@ -79,7 +155,41 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
                         }catch (Exception e){
 
+                            Toasty.warning(getApplicationContext(), "Watch list Updated", Toast.LENGTH_SHORT, true).show();
                         }
+                        try {
+                            fragmentFilled.getLocalFile_main();
+
+                        }catch (Exception e){
+
+                            Toasty.warning(getApplicationContext(), "Filled list Updated", Toast.LENGTH_SHORT, true).show();
+                        }
+
+                        break;
+
+                    case "android.intent.action.WithInMainNews":
+                        Log.d("MainActivity-Broadcast", "Broadcast Received successfully");
+                        Toasty.success(getApplicationContext(), "News Updated!", Toast.LENGTH_SHORT, true).show();
+                        try {
+                            fragmentNews.getLocalFile_main();
+                            Toasty.success(getApplicationContext(), "News Updated", Toast.LENGTH_SHORT, true).show();
+
+                        }catch (Exception e){
+                            Toasty.warning(getApplicationContext(), "News Updated", Toast.LENGTH_SHORT, true).show();
+                        }
+
+
+                        break;
+                    case "android.intent.action.WithInMainNewsFrag":
+                        Log.d("MainActivity-Broadcast", "Broadcast Received successfully");
+                        try {
+//                            fragmentNews.getLocalFile_main();
+                            Toasty.success(getApplicationContext(), "Upcoming News Alert!", Toast.LENGTH_SHORT, true).show();
+
+                        }catch (Exception e){
+                            Toasty.warning(getApplicationContext(), "Upcoming News Alert!", Toast.LENGTH_SHORT, true).show();
+                        }
+
 
                         break;
 
@@ -95,8 +205,27 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         setContentView(R.layout.activity_main);
 
 
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.SET_ALARM) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity) getApplicationContext(),
+                    new String[]{Manifest.permission.SET_ALARM},
+                    REQUEST_SET_ALARM);
+
+            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(NewsWorker.class).build();
+            WorkManager.getInstance(getApplicationContext()).enqueue(workRequest);
+
+        }else {
+            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(NewsWorker.class).build();
+            WorkManager.getInstance(getApplicationContext()).enqueue(workRequest);
+        }
+
+
+
+
         IntentFilter intentFilter = new IntentFilter("android.intent.action.WithInMain");
         registerReceiver(broadcastReceiver,intentFilter);
+        IntentFilter intentFilter1 = new IntentFilter("android.intent.action.WithInMainNews");
+        registerReceiver(broadcastReceiver,intentFilter1);
+
 
 
 
@@ -112,6 +241,187 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         fragmentPending=new PendingFragment();
         fragmentFilled=new FilledFragment();
         fragmentHistory=new HistoryFragment();
+
+        boolean hasPermission = (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+        if (!hasPermission) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_WRITE_STORAGE);
+        }
+        if (!hasPermission) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_WRITE_STORAGE);
+        }
+
+
+        btnSaveJson = toolbar.findViewById(R.id.btnSaveJson);
+        btnOpenFolder = toolbar.findViewById(R.id.btnOpenFolder);
+        progressBar=toolbar.findViewById(R.id.progress);
+
+
+
+        handler = new Handler(Looper.getMainLooper());
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                // Task to be executed every 4 second
+                btnSaveJson.setVisibility(View.GONE);
+                btnOpenFolder.setVisibility(View.GONE);
+
+                progressBar.setVisibility(View.VISIBLE);
+                // Re-run the runnable after 4 seconds
+                handler.postDelayed(this, 4000);
+            }
+        };
+
+        // Stop the handler after 4 seconds
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.GONE);
+                btnSaveJson.setVisibility(View.VISIBLE);
+                btnOpenFolder.setVisibility(View.VISIBLE);
+                handler.removeCallbacks(runnable);
+            }
+        }, 4000);
+
+        // Start the handler
+        handler.post(runnable);
+
+        btnSaveJson.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                        ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions((Activity) getApplicationContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+
+
+                    String jsonData = StorageUtils.readJsonFromFile(getApplicationContext(), FILE_NAME_PENDING_LOCAL);
+
+                    Type listType = new TypeToken<List<PendingPrice>>() {
+                    }.getType();
+                    ArrayList<PendingPrice> list = new Gson().fromJson(jsonData, listType);
+
+                    if (list == null || list.size() == 0) {
+                        Toasty.error(getApplicationContext(), "Can't backUp null or zero items.", Toast.LENGTH_SHORT, true).show();
+                    } else {
+                        Log.d("MainActivity", "tapped successfully");
+                        String file_name = "pendingBackUp.json";
+                        StorageUtils.writeJsonToFile_backUp(MainActivity.this, file_name, jsonData);
+                    }
+
+
+                }else {
+
+                    String jsonData = StorageUtils.readJsonFromFile(getApplicationContext(), FILE_NAME_PENDING_LOCAL);
+
+                    Type listType = new TypeToken<List<PendingPrice>>() {
+                    }.getType();
+                    ArrayList<PendingPrice> list = new Gson().fromJson(jsonData, listType);
+
+                    if (list == null || list.size() == 0) {
+                        Toasty.error(getApplicationContext(), "Can't backUp null or zero items.", Toast.LENGTH_SHORT, true).show();
+                    } else {
+
+                        String file_name = "pendingBackUp.json";
+                        StorageUtils.writeJsonToFile_backUp(MainActivity.this, file_name, jsonData);
+                    }
+
+                }
+            }
+        });
+
+        btnOpenFolder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                        ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions((MainActivity.this) , new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+
+
+                    if (Build.VERSION.SDK_INT >= 30){
+                        if (!Environment.isExternalStorageManager()){
+                            Intent getpermission = new Intent();
+                            getpermission.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                            startActivity(getpermission);
+                        }
+                    }
+
+                    String file_name = "pendingBackUp.json";
+                    String readJsonData = StorageUtils.readJsonFromFile_backUp(getApplicationContext(), file_name);
+
+                    Type listType = new TypeToken<List<PendingPrice>>() {
+                    }.getType();
+                    ArrayList<PendingPrice> list = new Gson().fromJson(readJsonData, listType);
+
+                    if (list == null) {
+                        Toasty.error(getApplicationContext(), "File doesn't exist.", Toast.LENGTH_SHORT, true).show();
+                    } else if (list.size() == 0) {
+                        Toasty.error(getApplicationContext(), "File has zero items.", Toast.LENGTH_SHORT, true).show();
+                    } else {
+                        Log.d("MainActivity", "tapped successfully");
+                        StorageUtils.writeJsonToFile(MainActivity.this, FILE_NAME_PENDING_LOCAL, readJsonData);
+                        StorageUtils.writeJsonToFile(MainActivity.this, FILE_NAME_PENDING, readJsonData);
+                        StorageUtils.writeJsonToFile(MainActivity.this, FILE_NAME_PENDING_FOREX_LOCAL, readJsonData);
+                        Toasty.warning(getApplicationContext(), "BackUp Successfully done.", Toast.LENGTH_SHORT, true).show();
+                        try {
+                            fragmentPair.getLocalFile_main();
+
+                        } catch (Exception e) {
+
+                        }
+                        try {
+                            fragmentPending.getLocalFile_main();
+
+                        } catch (Exception e) {
+
+                            Toasty.warning(getApplicationContext(), "Watch list restored.", Toast.LENGTH_SHORT, true).show();
+                        }
+                    }
+                }else {
+                    if (Build.VERSION.SDK_INT >= 30){
+                        if (!Environment.isExternalStorageManager()){
+                            Intent getpermission = new Intent();
+                            getpermission.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                            startActivity(getpermission);
+
+                        }
+                    }
+                    String file_name = "pendingBackUp.json";
+                    String readJsonData = StorageUtils.readJsonFromFile_backUp(getApplicationContext(), file_name);
+
+                    Type listType = new TypeToken<List<PendingPrice>>() {
+                    }.getType();
+                    ArrayList<PendingPrice> list = new Gson().fromJson(readJsonData, listType);
+
+                    if (list == null) {
+                        Toasty.error(getApplicationContext(), "File doesn't exist.", Toast.LENGTH_SHORT, true).show();
+                    } else if (list.size() == 0) {
+                        Toasty.error(getApplicationContext(), "File has zero items.", Toast.LENGTH_SHORT, true).show();
+                    } else {
+                        Log.d("MainActivity", "tapped successfully");
+                        StorageUtils.writeJsonToFile(MainActivity.this, FILE_NAME_PENDING_LOCAL, readJsonData);
+                        StorageUtils.writeJsonToFile(MainActivity.this, FILE_NAME_PENDING, readJsonData);
+                        StorageUtils.writeJsonToFile(MainActivity.this, FILE_NAME_PENDING_FOREX_LOCAL, readJsonData);
+                        try {
+                            fragmentPair.getLocalFile_main();
+
+                        } catch (Exception e) {
+
+                        }
+                        try {
+                            fragmentPending.getLocalFile_main();
+
+                        } catch (Exception e) {
+
+                            Toasty.warning(getApplicationContext(), "Watch list restored.", Toast.LENGTH_SHORT, true).show();
+                        }
+                    }
+                }
+            }
+        });
 
 
 
@@ -143,6 +453,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
 
         NotificationScheduler.scheduleNotification(this);
+        SetNewsInOnAppOpen();
 
 
 
@@ -162,7 +473,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         adapter.addFragment(fragmentPending, "Watch");
         adapter.addFragment(fragmentHistory, "Api");
         adapter.addFragment(fragmentFilled, "Filled");
-//        adapter.addFragment(fragmentNews, "News");
+        adapter.addFragment(fragmentNews, "News");
 
 
         viewPager.setAdapter(adapter);
@@ -193,7 +504,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
 
 
-
+        Intent intent_ = new Intent("android.intent.action.OVERLAY_ACTION");
+        sendBroadcast(intent_);
+        Log.d("OverLay-Received", "OVERLAY SUCCESS");
 
 
     }
@@ -260,5 +573,44 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(broadcastReceiver);
+        // Remove callbacks to avoid memory leaks
+        handler.removeCallbacks(runnable);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_WRITE_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+                Toasty.success(getApplicationContext(), "File Permision granted!", Toast.LENGTH_SHORT, true).show();
+
+
+            } else {
+                // Permission denied
+            }
+        }
+
+        if (requestCode == REQUEST_CODE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (Settings.canDrawOverlays(this)) {
+                    Intent intent = new Intent("android.intent.action.OVERLAY_ACTION");
+                    sendBroadcast(intent);
+                    Log.d("OverLay-Received", "OVERLAY SUCCESS-request");
+
+                }
+            }
+        }
+
+    }
+
+
+    private void SetNewsInOnAppOpen(){
+        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(setNewsAlarmOnLoadWorker.class).build();
+        WorkManager.getInstance(getApplicationContext()).enqueue(workRequest);
+
+        OneTimeWorkRequest workRequest2 = new OneTimeWorkRequest.Builder(NewsExpireWorker.class).build();
+        WorkManager.getInstance(getApplicationContext()).enqueue(workRequest2);
+
     }
 }

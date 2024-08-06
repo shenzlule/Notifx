@@ -25,8 +25,10 @@ import com.google.gson.Gson;
 import com.tonni.notifx.R;
 import com.tonni.notifx.Utils.Storage.StorageUtils;
 import com.tonni.notifx.Utils.receivers.NotificationActionReceiver;
+import com.tonni.notifx.Utils.scheduler.ReminderScheduler;
 import com.tonni.notifx.api.ApiResponse;
 import com.tonni.notifx.models.ApiTurn;
+import com.tonni.notifx.models.NotifWatchlistModel;
 import com.tonni.notifx.models.PendingPrice;
 
 import org.json.JSONObject;
@@ -51,6 +53,7 @@ public class FetchWorker extends Worker {
     private static final String FILE_NAME_FILLED_LOCAL = "filled.json";
     private static final String FILE_NAME_PENDING_FOREX_LOCAL = "pending_forex.json";
     private static final String FILE_NAME_PENDING_LOCAL = "pending_pending.json";
+    private static final String FILE_NAME_NOTIFICATION = "notification.json";
 
     private static final int MAX_PRIORITY = 10;
     private String queryUrl = URL + "?currency=" + CURRENCY + "&api_key=" + API_KEY;
@@ -127,18 +130,31 @@ public class FetchWorker extends Worker {
         // Read JSON data from internal storage
         String readJsonData_turn = StorageUtils.readJsonFromFile(context, FILE_NAME_TURN);
         String readJsonData_filled = StorageUtils.readJsonFromFile(context, FILE_NAME_FILLED_LOCAL);
+        String readJsonData_notification_id = StorageUtils.readJsonFromFile(context, FILE_NAME_NOTIFICATION);
         // Parse JSON data
         Type listType_turn = new TypeToken<List<ApiTurn>>() {
         }.getType();
         Type listType_filled = new TypeToken<List<PendingPrice>>() {
                 }.getType();
+                Type listType_noti = new TypeToken<List<NotifWatchlistModel>>() {
+                }.getType();
         List<ApiTurn> turnList = new Gson().fromJson(readJsonData_turn, listType_turn);
         ArrayList<PendingPrice> filled_list = new Gson().fromJson(readJsonData_filled, listType_filled);
+        ArrayList<NotifWatchlistModel> notifcation_list = new Gson().fromJson(readJsonData_notification_id, listType_noti);
 
         if (filled_list==null){
             filled_list=new ArrayList<>();
         }
-        if (turnList==null){
+
+        if (notifcation_list==null || notifcation_list.size()==0){
+                    notifcation_list=new ArrayList<>();
+                    notifcation_list.add(0,new NotifWatchlistModel(1000,0));
+        }
+                final int[] count_notification = {notifcation_list.get(0).getNotification_id_watch_list()};
+                final int[] count_notification_ = {notifcation_list.get(0).getNotification_id_watch_list()};
+
+
+                if (turnList==null){
             turnList=new ArrayList<>();
             turnList.add(0,new ApiTurn(1));
         }else if(turnList.get(0).getTurn_number()== 1){
@@ -156,8 +172,9 @@ public class FetchWorker extends Worker {
 
 
 
-        List<ApiTurn> finalTurnList = turnList;
+                List<ApiTurn> finalTurnList = turnList;
                 ArrayList<PendingPrice> finalFilled_list = filled_list;
+                ArrayList<NotifWatchlistModel> finalNotifcation_list = notifcation_list;
                 JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                 Request.Method.GET,
                 queryUrl,
@@ -223,16 +240,18 @@ public class FetchWorker extends Worker {
                                                         // Create an intent for the stop button
                                                         Intent stopIntent1 = new Intent(context, NotificationActionReceiver.class);
                                                         stopIntent1.setAction("WATCH_LIST_ALERT");
-                                                        int id_=(int) System.currentTimeMillis();
-                                                        stopIntent1.putExtra("id",id_);
-                                                        PendingIntent stopPendingIntent = PendingIntent.getBroadcast(context, 0, stopIntent1, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                                                        int id_1= count_notification[0]++;
+                                                        Log.d("MainActivity-WATCH", String.valueOf(id_1));
+
+                                                        stopIntent1.putExtra("id",id_1);
+                                                        PendingIntent stopPendingIntent = PendingIntent.getBroadcast(context, id_1, stopIntent1, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
                                                         // Create notification
                                                         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                                                         String channelId = "Api 10 interval data";
                                                         String channelName = "10 Minute Api Notification";
                                                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                                                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
                                                             notificationManager.createNotificationChannel(channel);
                                                         }
 
@@ -244,10 +263,10 @@ public class FetchWorker extends Worker {
                                                                 .addAction(R.drawable.ic_baseline_delete_forever_24, "Remove", stopPendingIntent) // Add stop button to notification
                                                                 .setOngoing(true) // Make the notification ongoing
                                                                 .setAutoCancel(false)
-                                                                .setVibrate(new long[]{0, 1000, 1000, 1000, 1000})
+                                                                .setVibrate(new long[]{1000, 1000, 1000, 1000})
                                                                 .build();
 
-                                                        notificationManager.notify(id_, notification);
+                                                        notificationManager.notify(id_1, notification);
                                                         // Display the response using Log
                                                         Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                     }
@@ -261,16 +280,18 @@ public class FetchWorker extends Worker {
                                                         // Create an intent for the stop button
                                                         Intent stopIntent2 = new Intent(context, NotificationActionReceiver.class);
                                                         stopIntent2.setAction("WATCH_LIST_ALERT");
-                                                        int id_=(int) System.currentTimeMillis();
+                                                        int id_=count_notification[0]++;
+                                                        Log.d("MainActivity-WATCH", String.valueOf(id_));
+
                                                         stopIntent2.putExtra("id",id_);
-                                                        PendingIntent stopPendingIntent = PendingIntent.getBroadcast(context, 0, stopIntent2, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                                                        PendingIntent stopPendingIntent = PendingIntent.getBroadcast(context, id_, stopIntent2, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
                                                         // Create notification
                                                         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                                                         String channelId = "Api 10 interval data";
                                                         String channelName = "10 Minute Api Notification";
                                                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                                                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
                                                             notificationManager.createNotificationChannel(channel);
                                                         }
 
@@ -282,7 +303,7 @@ public class FetchWorker extends Worker {
                                                                 .addAction(R.drawable.ic_baseline_delete_forever_24, "Remove", stopPendingIntent) // Add stop button to notification
                                                                 .setOngoing(true) // Make the notification ongoing
                                                                 .setAutoCancel(false)
-                                                                .setVibrate(new long[]{0, 1000, 1000, 1000, 1000})
+                                                                .setVibrate(new long[]{1000, 1000, 1000, 1000})
                                                                 .build();
 
                                                         notificationManager.notify(id_, notification);
@@ -321,12 +342,14 @@ public class FetchWorker extends Worker {
                                                         pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
                                                         finalFilled_list.add(pendingList_copy.get(j));
                                                         Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
-                                                        int id_=(int) System.currentTimeMillis();
+                                                        int id_=count_notification[0]++;
+                                                        Log.d("MainActivity-WATCH", String.valueOf(id_));
+
                                                         // Create an intent for the stop button
                                                         Intent stopIntent = new Intent(context, NotificationActionReceiver.class);
                                                         stopIntent.setAction("WATCH_LIST_ALERT");
                                                         stopIntent.putExtra("id",id_);
-                                                        PendingIntent stopPendingIntent = PendingIntent.getBroadcast(context, 0, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                                                        PendingIntent stopPendingIntent = PendingIntent.getBroadcast(context, id_, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
 
                                                         // Create notification
@@ -334,7 +357,7 @@ public class FetchWorker extends Worker {
                                                         String channelId = "Api 10 interval data";
                                                         String channelName = "10 Minute Api Notification";
                                                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                                                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
                                                             notificationManager.createNotificationChannel(channel);
                                                         }
 
@@ -344,7 +367,7 @@ public class FetchWorker extends Worker {
                                                                 .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
                                                                 .setSmallIcon(R.drawable.notif)
                                                                 .setAutoCancel(false)
-                                                                .setVibrate(new long[]{0, 1000, 1000, 1000, 1000})
+                                                                .setVibrate(new long[]{1000, 1000, 1000, 1000})
                                                                 .addAction(R.drawable.ic_baseline_delete_forever_24, "Remove", stopPendingIntent) // Add stop button to notification
                                                                 .setOngoing(true) // Make the notification ongoing
                                                                 .build();
@@ -363,16 +386,18 @@ public class FetchWorker extends Worker {
                                                         // Create an intent for the stop button
                                                         Intent stopIntent = new Intent(context, NotificationActionReceiver.class);
                                                         stopIntent.setAction("WATCH_LIST_ALERT");
-                                                        int id_=(int) System.currentTimeMillis();
+                                                        int id_=count_notification[0]++;
                                                         stopIntent.putExtra("id",id_);
-                                                        PendingIntent stopPendingIntent = PendingIntent.getBroadcast(context, 0, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                                                        Log.d("MainActivity-WATCH", String.valueOf(id_));
+
+                                                        PendingIntent stopPendingIntent = PendingIntent.getBroadcast(context, id_, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
                                                         // Create notification
                                                         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                                                         String channelId = "Api 10 interval data";
                                                         String channelName = "10 Minute Api Notification";
                                                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                                                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
                                                             notificationManager.createNotificationChannel(channel);
                                                         }
 
@@ -382,7 +407,7 @@ public class FetchWorker extends Worker {
                                                                 .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
                                                                 .setSmallIcon(R.drawable.notif)
                                                                 .addAction(R.drawable.ic_baseline_delete_forever_24, "Remove", stopPendingIntent) // Add stop button to notification
-                                                                .setVibrate(new long[]{0, 1000, 1000, 1000, 1000})
+                                                                .setVibrate(new long[]{1000, 1000, 1000, 1000})
                                                                 .setOngoing(true) // Make the notification ongoing
                                                                 .setAutoCancel(false)
                                                                 .build();
@@ -407,9 +432,17 @@ public class FetchWorker extends Worker {
                             }
 
 
+                            boolean isNewNots=count_notification_[0]<count_notification[0];
+                            if(isNewNots){
+                                finalNotifcation_list.get(0).setNotification_Reminder(1);
+                                ReminderScheduler.scheduleReminder(context);
+                            }
                             addNewPending(pendingList_copy, context);
                             String jsonData_turn_list = gson.toJson(finalTurnList);
+                            finalNotifcation_list.get(0).setNotification_id_watch_list(count_notification[0]);
+                            String jsonData_notification_list = gson.toJson(finalNotifcation_list);
                             StorageUtils.writeJsonToFile(context, FILE_NAME_TURN, jsonData_turn_list);
+                            StorageUtils.writeJsonToFile(context, FILE_NAME_NOTIFICATION, jsonData_notification_list);
                             String jsonData_filled_list = gson.toJson(finalFilled_list);
                             StorageUtils.writeJsonToFile(context, FILE_NAME_FILLED_LOCAL, jsonData_filled_list);
                         }
@@ -428,7 +461,7 @@ public class FetchWorker extends Worker {
                         String channelName = "10 Minute Api Notification";
 
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
                             notificationManager.createNotificationChannel(channel);
                         }
 
@@ -438,7 +471,7 @@ public class FetchWorker extends Worker {
                                 .setPriority(MAX_PRIORITY)
                                 .setStyle(new NotificationCompat.BigTextStyle().bigText("Failed to get Api data".toString())) // For longer text
                                 .setSmallIcon(R.drawable.notif)
-                                .setVibrate(new long[]{0, 1000, 1000, 1000, 1000})
+                                .setVibrate(new long[]{ 1000, 1000, 1000, 1000})
                                 .build();
 
                         notificationManager.notify(1, notification);

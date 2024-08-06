@@ -17,7 +17,11 @@ import com.bumptech.glide.Glide;
 import com.tonni.notifx.R;
 import com.tonni.notifx.models.ForexNewsItem;
 
+import java.text.ParseException;
+import java.util.Calendar;
 import java.util.List;
+
+import es.dmoral.toasty.Toasty;
 
 public class ForexNewsAdapter extends RecyclerView.Adapter<ForexNewsAdapter.ForexNewsViewHolder> {
     private List<ForexNewsItem> forexNewsItems;
@@ -43,11 +47,36 @@ public class ForexNewsAdapter extends RecyclerView.Adapter<ForexNewsAdapter.Fore
         holder.eventTextView.setText(newsItem.getName()+" "+newsItem.getName()+" "+newsItem.getName()+" "+newsItem.getName()+" "+newsItem.getName()+" "+newsItem.getName()+" "+newsItem.getName()+" "+newsItem.getName());
         holder.eventTextView.setSelected(true);
 
+        String DOW_str="";
+        try {
+            Calendar calendar = newsItem.getCalendar();
+            int DOW = calendar.get(Calendar.DAY_OF_WEEK);
 
+            if(DOW==1){
+                DOW_str="SUNDAY";
+            }else  if(DOW==2){
+                DOW_str="MONDAY";
+            }else  if(DOW==3){
+                DOW_str="TUESDAY";
+            }else  if(DOW==4){
+                DOW_str="WEDNESDAY";
+            }else  if(DOW==5){
+                DOW_str="THURSDAY";
+            }else  if(DOW==6){
+                DOW_str="FRIDAY";
+            }else  if(DOW==7){
+                DOW_str="SATURDAY";
+            }
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        String final_DOW_str = DOW_str;
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, String.valueOf(newsItem.getName()), Toast.LENGTH_SHORT).show();
+                Toasty.info(context,  String.valueOf(newsItem.getName())+" "+"["+ final_DOW_str+"]", Toast.LENGTH_SHORT, true).show();
             }
         });
 
