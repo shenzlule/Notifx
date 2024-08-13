@@ -24,6 +24,7 @@ import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflec
 import com.tonni.notifx.R;
 import com.tonni.notifx.Utils.Storage.StorageUtils;
 
+import com.tonni.notifx.Utils.workers.NewsExpireWorker;
 import com.tonni.notifx.Utils.workers.NewsWorker;
 import com.tonni.notifx.adapter.ForexNewsAdapter;
 import com.tonni.notifx.inter.RefreshableFragment;
@@ -98,6 +99,8 @@ public class NewsFragment extends Fragment implements RefreshableFragment {
         getLocalFile(forexNewsItems);
 
 
+        OneTimeWorkRequest workRequest2 = new OneTimeWorkRequest.Builder(NewsExpireWorker.class).build();
+        WorkManager.getInstance(getContext()).enqueue(workRequest2);
 
         return view;
     }

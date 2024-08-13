@@ -606,11 +606,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
 
     private void SetNewsInOnAppOpen(){
+        OneTimeWorkRequest workRequest2 = new OneTimeWorkRequest.Builder(NewsExpireWorker.class).build();
+        WorkManager.getInstance(getApplicationContext()).enqueue(workRequest2);
+
         OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(setNewsAlarmOnLoadWorker.class).build();
         WorkManager.getInstance(getApplicationContext()).enqueue(workRequest);
 
-        OneTimeWorkRequest workRequest2 = new OneTimeWorkRequest.Builder(NewsExpireWorker.class).build();
-        WorkManager.getInstance(getApplicationContext()).enqueue(workRequest2);
+
 
     }
 }
