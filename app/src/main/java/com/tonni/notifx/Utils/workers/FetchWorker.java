@@ -27,6 +27,7 @@ import com.tonni.notifx.Utils.Storage.StorageUtils;
 import com.tonni.notifx.Utils.receivers.NotificationActionReceiver;
 import com.tonni.notifx.Utils.scheduler.ReminderScheduler;
 import com.tonni.notifx.api.ApiResponse;
+import com.tonni.notifx.models.ApiCount;
 import com.tonni.notifx.models.ApiTurn;
 import com.tonni.notifx.models.ForexCurrency;
 import com.tonni.notifx.models.NotifWatchlistModel;
@@ -56,6 +57,7 @@ public class FetchWorker extends Worker {
     private static final String FILE_NAME_PENDING_LOCAL = "pending_pending.json";
     private static final String FILE_NAME_NOTIFICATION = "notification.json";
     private static final String FILE_NAME_CURRENCIES_LOCAL = "currencies.json";
+    private static final String FILE_NAME_API_COUNT = "api_count.json";
 
 
     private static final int MAX_PRIORITY = 10;
@@ -132,22 +134,34 @@ public class FetchWorker extends Worker {
         //get turn
         // Read JSON data from internal storage
         String readJsonData_turn = StorageUtils.readJsonFromFile(context, FILE_NAME_TURN);
+        String readJsonData_Api_Count = StorageUtils.readJsonFromFile(context, FILE_NAME_API_COUNT);
         String readJsonData_filled = StorageUtils.readJsonFromFile(context, FILE_NAME_FILLED_LOCAL);
         String readJsonData_notification_id = StorageUtils.readJsonFromFile(context, FILE_NAME_NOTIFICATION);
         // Parse JSON data
         Type listType_turn = new TypeToken<List<ApiTurn>>() {
         }.getType();
+
+        Type listType_api_count = new TypeToken<List<ApiCount>>() {
+                }.getType();
+
         Type listType_filled = new TypeToken<List<PendingPrice>>() {
                 }.getType();
-                Type listType_noti = new TypeToken<List<NotifWatchlistModel>>() {
+        Type listType_noti = new TypeToken<List<NotifWatchlistModel>>() {
                 }.getType();
         List<ApiTurn> turnList = new Gson().fromJson(readJsonData_turn, listType_turn);
         ArrayList<PendingPrice> filled_list = new Gson().fromJson(readJsonData_filled, listType_filled);
         ArrayList<NotifWatchlistModel> notifcation_list = new Gson().fromJson(readJsonData_notification_id, listType_noti);
+        ArrayList<ApiCount> api_count_list = new Gson().fromJson(readJsonData_Api_Count, listType_api_count);
 
         if (filled_list==null){
             filled_list=new ArrayList<>();
         }
+
+        if (api_count_list==null){
+                    api_count_list=new ArrayList<>();
+                    api_count_list.add(0,new ApiCount(0,0,0,0));
+                }
+
 
         if (notifcation_list==null || notifcation_list.size()==0){
                     notifcation_list=new ArrayList<>();
@@ -159,13 +173,16 @@ public class FetchWorker extends Worker {
 
                 if (turnList==null){
             turnList=new ArrayList<>();
+
             turnList.add(0,new ApiTurn(1));
         }else if(turnList.get(0).getTurn_number()== 1){
             //make use of one api and flip for the next turn
+            turnList.clear();
             turnList.add(0,new ApiTurn(2));
             queryUrl = queryUrl_1;
         }else if(turnList.get(0).getTurn_number() == 2){
             //make use of one api and flip for the next turn
+            turnList.clear();
             turnList.add(0,new ApiTurn(1));
             queryUrl = queryUrl_2;
         }
@@ -178,6 +195,8 @@ public class FetchWorker extends Worker {
                 List<ApiTurn> finalTurnList = turnList;
                 ArrayList<PendingPrice> finalFilled_list = filled_list;
                 ArrayList<NotifWatchlistModel> finalNotifcation_list = notifcation_list;
+                List<ApiTurn> finalTurnList1 = turnList;
+                ArrayList<ApiCount> finalApi_count_list = api_count_list;
                 JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                 Request.Method.GET,
                 queryUrl,
@@ -188,6 +207,21 @@ public class FetchWorker extends Worker {
                         // Parse the JSON response
                         Gson gson = new Gson();
                         ApiResponse apiResponse = gson.fromJson(response.toString(), ApiResponse.class);
+
+
+                        if(finalTurnList1.get(0).getTurn_number()==1){
+                            ApiCount apiCount= finalApi_count_list.get(0);
+                            int count_api=apiCount.getApi_count_success_2();
+                            apiCount.setApi_count_success_2(count_api+1);
+                            finalApi_count_list.set(0,apiCount);
+
+                        }
+                        else {
+                            ApiCount apiCount= finalApi_count_list.get(0);
+                            int count_api=apiCount.getApi_count_success_1();
+                            apiCount.setApi_count_success_1(count_api+1);
+                            finalApi_count_list.set(0,apiCount);
+                        }
 
 
                         // Load Forex news items from JSON
@@ -452,11 +486,13 @@ public class FetchWorker extends Worker {
 
                             boolean isNewNots=count_notification_[0]<count_notification[0];
 
+                        saved_file_api_count(context,finalApi_count_list);
+
+                        Intent intent_api_count= new Intent("android.intent.action.WithInMain_api_count");
 
 
                         if(isNewNots){
 //
-
 
                             addNewPending(pendingList_copy, context);
                             String jsonData_turn_list = gson.toJson(finalTurnList);
@@ -466,7 +502,7 @@ public class FetchWorker extends Worker {
                             StorageUtils.writeJsonToFile(context, FILE_NAME_NOTIFICATION, jsonData_notification_list);
                             String jsonData_filled_list = gson.toJson(finalFilled_list);
                             StorageUtils.writeJsonToFile(context, FILE_NAME_FILLED_LOCAL, jsonData_filled_list);
-                            saved_file(context,currencies_copy);
+                            saved_file_currencies(context,currencies_copy);
 
 //                            Alert
                             Intent intent= new Intent("android.intent.action.WithInMain");
@@ -493,6 +529,25 @@ public class FetchWorker extends Worker {
                             NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
                             notificationManager.createNotificationChannel(channel);
                         }
+
+                        if(finalTurnList1.get(0).getTurn_number()==1){
+                            ApiCount apiCount= finalApi_count_list.get(0);
+                            int count_api=apiCount.getApi_count_fail_2();
+                            apiCount.setApi_count_fail_2(count_api+1);
+                            finalApi_count_list.set(0,apiCount);
+
+                        }
+                        else {
+                            ApiCount apiCount= finalApi_count_list.get(0);
+                            int count_api=apiCount.getApi_count_fail_1();
+                            apiCount.setApi_count_fail_1(count_api+1);
+                            finalApi_count_list.set(0,apiCount);
+                        }
+
+                        saved_file_api_count(context,finalApi_count_list);
+                        Intent intent_api_count= new Intent("android.intent.action.WithInMain_api_count");
+
+
 
                         Notification notification = new NotificationCompat.Builder(context, channelId)
                                 .setContentTitle("Watch list")
@@ -595,7 +650,7 @@ public class FetchWorker extends Worker {
     }
 
 
-    public  void saved_file(Context context, ArrayList<ForexCurrency> currencies){
+    public  void saved_file_currencies(Context context, ArrayList<ForexCurrency> currencies){
         Gson gson = new Gson();
         //CLEAR
         ArrayList<ForexCurrency> clear_list=new ArrayList<>();
@@ -609,5 +664,22 @@ public class FetchWorker extends Worker {
 //        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData);
 
     }
+
+    public  void saved_file_api_count(Context context, ArrayList<ApiCount> apiCounts){
+        Gson gson = new Gson();
+        //CLEAR
+        ArrayList<ApiCount> clear_list=new ArrayList<>();
+        String jsonData_ = gson.toJson(clear_list);
+        StorageUtils.writeJsonToFile(context, FILE_NAME_API_COUNT, jsonData_);
+
+        // SAVE DATA
+        String jsonData = gson.toJson(apiCounts);
+        StorageUtils.writeJsonToFile(context, FILE_NAME_API_COUNT, jsonData);
+//        TODO:to remove
+//        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData);
+
+    }
+
+
 
 }

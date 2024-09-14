@@ -27,14 +27,22 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.IScatterDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.utils.FileUtils;
+import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.tonni.notifx.Utils.Storage.StorageUtils;
+import com.tonni.notifx.models.ApiCount;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings({"SameParameterValue", "WeakerAccess"})
 public abstract class SimpleFragment extends Fragment {
 
     private Typeface tf;
     protected Context context;
+    private static final String FILE_NAME_API_COUNT = "api_count.json";
+
 
     @Override
     public void onAttach(Context context) {
@@ -111,8 +119,69 @@ public abstract class SimpleFragment extends Fragment {
 
         ArrayList<PieEntry> entries1 = new ArrayList<>();
 
+        entries1.clear();
+
+        String readJsonData_Api_Count = StorageUtils.readJsonFromFile(context, FILE_NAME_API_COUNT);
+
+        Type listType_api_count = new TypeToken<List<ApiCount>>() {
+        }.getType();
+        ArrayList<ApiCount> api_count_list = new Gson().fromJson(readJsonData_Api_Count, listType_api_count);
+
+        if (api_count_list==null){
+            api_count_list=new ArrayList<>();
+            api_count_list.add(0,new ApiCount(500,500,500,500));
+
+        }
+
+
         for(int i = 0; i < count; i++) {
-            entries1.add(new PieEntry((float) ((Math.random() * 60) + 40), "Api " + (i+1)));
+
+            if (i==1){
+                entries1.add(new PieEntry((float) ((api_count_list.get(0).getApi_count_success_1()/2000)*360), "Api " + (i+1)));
+            }else{
+                entries1.add(new PieEntry((float) ((api_count_list.get(0).getApi_count_success_2()/2000)*360), "Api " + (i+1)));
+            }
+        }
+
+        PieDataSet ds1 = new PieDataSet(entries1, "Stats");
+        ds1.setColors(ColorTemplate.MATERIAL_COLORS);
+        ds1.setSliceSpace(2f);
+        ds1.setValueTextColor(Color.BLACK);
+        ds1.setValueTextSize(12f);
+
+        PieData d = new PieData(ds1);
+        d.setValueTypeface(tf);
+
+        return d;
+    }
+
+    protected PieData generatePieData_fails() {
+
+        int count = 2;
+
+        ArrayList<PieEntry> entries1 = new ArrayList<>();
+
+        entries1.clear();
+
+        String readJsonData_Api_Count = StorageUtils.readJsonFromFile(context, FILE_NAME_API_COUNT);
+
+        Type listType_api_count = new TypeToken<List<ApiCount>>() {
+        }.getType();
+        ArrayList<ApiCount> api_count_list = new Gson().fromJson(readJsonData_Api_Count, listType_api_count);
+
+        if (api_count_list==null){
+            api_count_list=new ArrayList<>();
+            api_count_list.add(0,new ApiCount(500,500,500,500));
+        }
+
+
+        for(int i = 0; i < count; i++) {
+
+            if (i==1){
+                entries1.add(new PieEntry((float) ((api_count_list.get(0).getApi_count_fail_1()/2000)*360), "Api " + (i+1)));
+            }else{
+                entries1.add(new PieEntry((float) ((api_count_list.get(0).getApi_count_fail_2()/2000)*360), "Api " + (i+1)));
+            }
         }
 
         PieDataSet ds1 = new PieDataSet(entries1, "Stats");

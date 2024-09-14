@@ -46,6 +46,7 @@ import com.tonni.notifx.Utils.workers.NewsWorker;
 import com.tonni.notifx.Utils.workers.setNewsAlarmOnLoadWorker;
 import com.tonni.notifx.frags.FilledFragment;
 import com.tonni.notifx.frags.ForexFragment;
+import com.tonni.notifx.frags.HistoryFragment;
 import com.tonni.notifx.frags.Journal;
 import com.tonni.notifx.frags.NewsFragment;
 import com.tonni.notifx.frags.WatchFragment;
@@ -184,6 +185,19 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
 
                         break;
+                    case "android.intent.action.WithInMain_api_count":
+                        Log.d("MainActivity-Broadcast", "Broadcast Received successfully");
+                        try {
+//
+
+                            fragmentHistory.update_stats();
+                        }catch (Exception e){
+                            Toasty.warning(getApplicationContext(), "Stats Updated!", Toast.LENGTH_SHORT, true).show();
+                        }
+
+
+                        break;
+
 
                 }
             }
@@ -215,8 +229,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
         IntentFilter intentFilter = new IntentFilter("android.intent.action.WithInMain");
         registerReceiver(broadcastReceiver,intentFilter);
+
         IntentFilter intentFilter1 = new IntentFilter("android.intent.action.WithInMainNews");
         registerReceiver(broadcastReceiver,intentFilter1);
+
+        IntentFilter intentFilter2 = new IntentFilter("android.intent.action.WithInMain_api_count");
+        registerReceiver(broadcastReceiver,intentFilter2);
 
 
 

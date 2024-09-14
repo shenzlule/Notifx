@@ -1,29 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:gravity="center"
+    android:background="@color/black"
+    android:layout_margin="10dp"
     android:orientation="vertical" >
 
 
-    <HorizontalScrollView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="horizontal" >
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/success_call"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:textColor="@color/poppy"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+
+                android:textStyle="normal"
+                android:layout_marginVertical="5dp"
+                android:text="Successful Calls Data."
+                android:textSize="12sp" />
+
+            <TextView
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:textColor="@color/poppy"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:textStyle="normal"
+                android:layout_marginBottom="10dp"
+                android:text="Successful Calls information. "
+                android:textSize="12sp" />
 
     <com.github.mikephil.charting.charts.PieChart
         android:id="@+id/pieChart1"
         android:layout_width="280dp"
         android:layout_height="280dp" />
+
+            <TextView
+                android:id="@+id/failed_calls"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:layout_marginTop="10dp"
+                android:textColor="@color/poppy"
+                android:layout_alignParentLeft="true"
+                android:textStyle="normal"
+                android:layout_marginVertical="5dp"
+                android:text="Failed Calls Data."
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:textColor="@color/poppy"
+                android:textStyle="normal"
+                android:layout_marginBottom="10dp"
+                android:text="Failed Calls Data information."
+                android:textSize="12sp" />
+
     <com.github.mikephil.charting.charts.PieChart
         android:id="@+id/pieChart2"
         android:layout_width="270dp"
         android:layout_height="270dp" />
         </LinearLayout>
-    </HorizontalScrollView>
+    </ScrollView>
 
 </LinearLayout>

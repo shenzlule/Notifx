@@ -10,10 +10,13 @@ import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
 import com.tonni.notifx.R;
+
+import es.dmoral.toasty.Toasty;
 
 
 public class PieChartFrag extends SimpleFragment {
@@ -76,21 +79,27 @@ public class PieChartFrag extends SimpleFragment {
 //        l2.setOrientation(Legend.LegendOrientation.VERTICAL);
 //        l2.setDrawInside(false);
 
-        chart2.setData(generatePieData());
+        chart2.setData(generatePieData_fails());
 
         return v;
     }
 
     private SpannableString generateCenterText() {
-        SpannableString s = new SpannableString("0/1000\nFilled");
+        SpannableString s = new SpannableString("0/2000\nFilled");
         s.setSpan(new RelativeSizeSpan(2f), 0, 6, 0);
         s.setSpan(new ForegroundColorSpan(Color.GRAY), 6, s.length(), 0);
         return s;
     }
     private SpannableString generateCenterText_() {
-        SpannableString s = new SpannableString("0/1000\nFails");
+        SpannableString s = new SpannableString("0/2000\nFails");
         s.setSpan(new RelativeSizeSpan(2f), 0, 6, 0);
         s.setSpan(new ForegroundColorSpan(Color.GRAY), 6, s.length(), 0);
         return s;
+    }
+
+    public  void update_stats(){
+        chart.setData(generatePieData());
+        chart2.setData(generatePieData_fails());
+        Toasty.success(getContext(), "Stats Updated!", Toast.LENGTH_SHORT, true).show();
     }
 }
