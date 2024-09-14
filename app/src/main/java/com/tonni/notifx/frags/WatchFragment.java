@@ -13,21 +13,23 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.tonni.notifx.R;
+import com.tonni.notifx.Utils.SortPending;
 import com.tonni.notifx.Utils.Storage.StorageUtils;
 import com.tonni.notifx.inter.MainActivityInterface;
 import com.tonni.notifx.inter.PendingInterface;
-import com.tonni.notifx.adapter.PendingAdapter;
+import com.tonni.notifx.adapter.Watch_list_Adapter;
 import com.tonni.notifx.inter.RefreshableFragment;
 import com.tonni.notifx.models.PendingPrice;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 
-public class PendingFragment extends Fragment implements RefreshableFragment, PendingInterface {
+public class WatchFragment extends Fragment implements RefreshableFragment, PendingInterface {
 
     private MainActivityInterface mainActivityInterface;
     private RecyclerView recyclerView;
-    private PendingAdapter pendingAdapter;
+    private Watch_list_Adapter pendingAdapter;
     private static final String FILE_NAME_PENDING = "pending.json";
     private ArrayList<PendingPrice> pendingPrices = new ArrayList<>();
     private static final String FILE_NAME_PENDING_LOCAL = "pending_pending.json";
@@ -48,7 +50,7 @@ public class PendingFragment extends Fragment implements RefreshableFragment, Pe
 
         pendingPrices= new ArrayList<>();
 
-        pendingAdapter = new PendingAdapter(this, pendingPrices,getContext());
+        pendingAdapter = new Watch_list_Adapter(this, pendingPrices,getContext());
         recyclerView.setAdapter(pendingAdapter);
 
        getLocalFile(pendingPrices);
@@ -64,10 +66,11 @@ public class PendingFragment extends Fragment implements RefreshableFragment, Pe
 
 
     public void deletePendingPos( int pos){
+        int realPosOfCurrency=pendingPrices.get(pos).getPosFromCurrency();
         pendingPrices.remove(pos);
         pendingAdapter.notifyItemRemoved(pos);
         //update forex fragment
-        mainActivityInterface.UpdateForexMainActivity().refreshUIFromPending(pos);
+        mainActivityInterface.UpdateForexMainActivity().refreshUIFromPending(pos,realPosOfCurrency);
         saved_files();
     }
 
@@ -82,7 +85,15 @@ public class PendingFragment extends Fragment implements RefreshableFragment, Pe
         //Add the item to the list and update the adapter
         int pos=pendingPrices.size();
         pendingPrices.add(pendingPrice);
-        pendingAdapter.notifyItemInserted(pos);
+
+        //       TODO To remove
+        ArrayList<PendingPrice> temp = new ArrayList<>();
+        temp.addAll(pendingPrices);
+        pendingPrices.clear();
+        pendingPrices.addAll(SortPending.sort(temp));
+        //        TODO To remove up
+//        pendingAdapter.notifyItemInserted(pos);
+        pendingAdapter.notifyDataSetChanged();
         saved_file();
     }
 
@@ -103,6 +114,14 @@ public class PendingFragment extends Fragment implements RefreshableFragment, Pe
         }
 
         pendingPricesForex.addAll(pendingPrices_);
+        //        TODO To remove
+        ArrayList<PendingPrice> temp = new ArrayList<>();
+        temp.addAll(pendingPricesForex);
+        pendingPricesForex.clear();
+        pendingPricesForex.addAll(SortPending.sort(temp));
+
+
+        //        TODO To remove up
         pendingAdapter.notifyDataSetChanged();
 
         return true;

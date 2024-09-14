@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.tonni.notifx.R;
+import com.tonni.notifx.Utils.TimeConverter;
 import com.tonni.notifx.frags.FilledFragment;
 import com.tonni.notifx.models.PendingPrice;
 
@@ -33,7 +34,7 @@ public class FilledAdapter extends RecyclerView.Adapter<FilledAdapter.ViewHolder
     List<PendingPrice> filledPrices_list;
     Context context;
     FilledFragment filledFragment;
-    private static  final DecimalFormat decfor = new DecimalFormat("0.0");
+    private static  final DecimalFormat decfor = new DecimalFormat("0.000");
 
     public FilledAdapter(FilledFragment filledFragment,List<PendingPrice> pendingPrices, Context context) {
         this.filledPrices_list =pendingPrices;
@@ -69,12 +70,12 @@ public class FilledAdapter extends RecyclerView.Adapter<FilledAdapter.ViewHolder
             holder.pending_mar_notes.setText(String.valueOf(pendingPrice.getNote()));
             holder.date.setText(String.valueOf("Date: " + convertMillisToDateString(Long.parseLong(pendingPrice.getDate_filled()))));
             holder.pending_mar_notes.setSelected(true);
-            holder.elp.setText(String.valueOf("Elapsed hours: " +  decfor.format(elapsedHours)));
+            holder.elp.setText(String.valueOf("ET: " + TimeConverter.convertHours(Double.parseDouble(decfor.format(elapsedHours)))));
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toasty.info(context, String.valueOf(pendingPrice.getDate_filled().toString()), Toast.LENGTH_SHORT, true).show();
+                    Toasty.info(context, String.valueOf(pendingPrice.getNote().toString()), Toast.LENGTH_SHORT, true).show();
                 }
             });
             holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {

@@ -1,12 +1,10 @@
 package com.tonni.notifx.inter;
 
-import androidx.fragment.app.Fragment;
-
 import com.tonni.notifx.frags.ForexFragment;
-import com.tonni.notifx.frags.PendingFragment;
+import com.tonni.notifx.frags.WatchFragment;
 
 public interface MainActivityInterface {
   void MakeConnThruInter();
-  PendingFragment UpdatePendingMainActivity();
+  WatchFragment UpdatePendingMainActivity();
   ForexFragment UpdateForexMainActivity();
 }

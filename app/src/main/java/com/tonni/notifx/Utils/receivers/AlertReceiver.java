@@ -61,9 +61,9 @@ public class AlertReceiver extends BroadcastReceiver {
                     .setContentText(time)
                     .setStyle(new NotificationCompat.BigTextStyle().bigText(name)) // For longer text
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setAutoCancel(false) // Notification cannot be dismissed by swiping
-                    .setOngoing(true) // Make the notification ongoing
-                    .addAction(R.drawable.ic_baseline_delete_forever_24, "Remove", stopPendingIntent) // Add stop button to notification
+                    .setAutoCancel(true) // Notification  be dismissed by swiping
+                    .setOngoing(false) // Make the notification ongoing
+//                    .addAction(R.drawable.ic_baseline_delete_forever_24, "Remove", stopPendingIntent) // Add stop button to notification
                     .setVibrate(new long[]{1000, 1000, 1000, 1000}); // Initial vibration pattern
 
             // Get the NotificationManager service
@@ -117,7 +117,7 @@ public class AlertReceiver extends BroadcastReceiver {
                     .setContentText(time)
                     .setStyle(new NotificationCompat.BigTextStyle().bigText(name)) // For longer text
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setAutoCancel(false) // Notification cannot be dismissed by swiping
+                    .setAutoCancel(false) // Notification  be dismissed by swiping
                     .setOngoing(true) // Make the notification ongoing
                     .addAction(R.drawable.ic_baseline_delete_forever_24, "Remove", stopPendingIntent) // Add stop button to notification
                     .setVibrate(new long[]{1000, 1000, 1000, 1000}); // Initial vibration pattern

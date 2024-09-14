@@ -282,6 +282,12 @@ public class NewsWorker extends Worker {
             long min_15_=longItemTime-(15*60*1000);
             long min_5_=longItemTime-(5*60*1000);
             long min_2_=longItemTime-(2*60*1000);
+            long twoHour_=(120*60*1000);
+            long oneHour_=(60*60*1000);
+            long halfHour_=(30*60*1000);
+            long min_15__=(15*60*1000);
+            long min_5__=(5*60*1000);
+            long min_2__=(2*60*1000);
             Calendar min_2_Calendar=Calendar.getInstance();
             Calendar min_5_Calendar=Calendar.getInstance();
             Calendar min_15_Calendar=Calendar.getInstance();
@@ -291,11 +297,11 @@ public class NewsWorker extends Worker {
 
 
             twoHourCalendar.setTimeInMillis(twoHour);
-            oneHourCalendar.setTimeInMillis(twoHour);
-            halfHourCalendar.setTimeInMillis(twoHour);
-            min_15_Calendar.setTimeInMillis(twoHour);
-            min_5_Calendar.setTimeInMillis(twoHour);
-            min_2_Calendar.setTimeInMillis(twoHour);
+            oneHourCalendar.setTimeInMillis(oneHour);
+            halfHourCalendar.setTimeInMillis(halfHour);
+            min_15_Calendar.setTimeInMillis(min_15_);
+            min_5_Calendar.setTimeInMillis(min_5_);
+            min_2_Calendar.setTimeInMillis(min_2_);
 
             if(item.getCalendar().getTime().after(nowCalendar.getTime())){
 
@@ -310,7 +316,8 @@ public class NewsWorker extends Worker {
                 Log.d("Boot Notifx", "Alarm set for " + item.getName() + " at " + item.getCalendar().getTimeInMillis());
                 Log.d("Boot Notifx", "Alarm set for " + item.getName() + " at " + item.getTime()+"[Now]" + " " + item.getCalendar().getTimeInMillis());
 
-                if(item.getCalendar().getTime().after(twoHourCalendar.getTime())){
+                if(item.getCalendar().getTime().after(twoHourCalendar.getTime()) &&
+                        (item.getCalendar().getTimeInMillis()-nowCalendar.getTimeInMillis())>=twoHour_){
 
                     Intent intent = new Intent(context, AlertReceiver.class);
                     intent.putExtra("name", item.getName()+"[In 2hrs]");
@@ -322,7 +329,8 @@ public class NewsWorker extends Worker {
                     Log.d("Boot Notifx", "Alarm set for " + item.getName() + " at " + twoHourCalendar.getTimeInMillis());
                     Log.d("Boot Notifx", "Alarm set for " + item.getName() + " at " + item.getTime()+"[Two hour]" + " " + twoHourCalendar.getTimeInMillis());
                 }
-                if(item.getCalendar().getTime().after(oneHourCalendar.getTime())){
+                if(item.getCalendar().getTime().after(oneHourCalendar.getTime())  &&
+                        (item.getCalendar().getTimeInMillis()-nowCalendar.getTimeInMillis())>=oneHour_){
 
                     Intent intent = new Intent(context, AlertReceiver.class);
                     intent.putExtra("name", item.getName()+"[In 1hr]");
@@ -334,7 +342,8 @@ public class NewsWorker extends Worker {
                     Log.d("Boot Notifx", "Alarm set for " + item.getName() + " at " + oneHourCalendar.getTimeInMillis());
                     Log.d("Boot Notifx", "Alarm set for " + item.getName() + " at " + item.getTime()+"[One hour]" + " " + oneHourCalendar.getTimeInMillis());
                 }
-                if(item.getCalendar().getTime().after(halfHourCalendar.getTime())){
+                if(item.getCalendar().getTime().after(halfHourCalendar.getTime())  &&
+                        (item.getCalendar().getTimeInMillis()-nowCalendar.getTimeInMillis())>=halfHour_){
 
                     Intent intent = new Intent(context, AlertReceiver.class);
                     intent.putExtra("name", item.getName()+"[In 30min]");
@@ -346,7 +355,8 @@ public class NewsWorker extends Worker {
                     Log.d("Boot Notifx", "Alarm set for " + item.getName() + " at " + halfHourCalendar.getTimeInMillis());
                     Log.d("Boot Notifx", "Alarm set for " + item.getName() + " at " + item.getTime()+"[30min]" + " " + halfHourCalendar.getTimeInMillis());
                 }
-                if(item.getCalendar().getTime().after(min_15_Calendar.getTime())){
+                if(item.getCalendar().getTime().after(min_15_Calendar.getTime()) &&
+                        (item.getCalendar().getTimeInMillis()-nowCalendar.getTimeInMillis())>=min_15__){
 
                     Intent intent = new Intent(context, AlertReceiver.class);
                     intent.putExtra("name", item.getName()+"[In 15min]");
@@ -358,7 +368,8 @@ public class NewsWorker extends Worker {
                     Log.d("Boot Notifx", "Alarm set for " + item.getName() + " at " + min_15_Calendar.getTimeInMillis());
                     Log.d("Boot Notifx", "Alarm set for " + item.getName() + " at " + item.getTime()+"[15 min]" + " " + min_15_Calendar.getTimeInMillis());
                 }
-                if(item.getCalendar().getTime().after(min_5_Calendar.getTime())){
+                if(item.getCalendar().getTime().after(min_5_Calendar.getTime())  &&
+                        (item.getCalendar().getTimeInMillis()-nowCalendar.getTimeInMillis())>=min_5__){
 
                     Intent intent = new Intent(context, AlertReceiver.class);
                     intent.putExtra("name", item.getName()+"[In 5min]");
@@ -370,7 +381,8 @@ public class NewsWorker extends Worker {
                     Log.d("Boot Notifx", "Alarm set for " + item.getName() + " at " + min_5_Calendar.getTimeInMillis());
                     Log.d("Boot Notifx", "Alarm set for " + item.getName() + " at " + item.getTime()+"[15 min]" + " " + min_5_Calendar.getTimeInMillis());
                 }
-                if(item.getCalendar().getTime().after(min_2_Calendar.getTime())){
+                if(item.getCalendar().getTime().after(min_2_Calendar.getTime())  &&
+                        (item.getCalendar().getTimeInMillis()-nowCalendar.getTimeInMillis())>=min_2__){
                     Intent intent = new Intent(context, AlertReceiver.class);
                     intent.putExtra("name", item.getName()+"[In 2min]");
                     intent.putExtra("time", item.getTime());

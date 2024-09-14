@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.tonni.notifx.R;
+import com.tonni.notifx.Utils.SortPending;
 import com.tonni.notifx.Utils.Storage.StorageUtils;
 import com.tonni.notifx.adapter.ForexCurrencyAdapter;
 import com.tonni.notifx.Utils.SwipeToRevealCallback;
@@ -180,11 +181,13 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
                 Calendar calendar = Calendar.getInstance();
                 addNewPending(position, formattedPriceInput, notesInputText,
                         pair_,
-                        String.valueOf(calendar.getTimeInMillis()),dirText,pair_v);
+                        String.valueOf(calendar.getTimeInMillis()),dirText,pair_v,forexCurrency.getPosition());
                 Toasty.info(getContext(), "Input: " + formattedPriceInput+dirText +" "+notes_input.getText().toString() , Toast.LENGTH_SHORT, true).show();
 
             } catch (NumberFormatException e) {
-                Toast.makeText(getContext(), "Invalid price input", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "Invalid price input", Toast.LENGTH_SHORT).show();
+                Toasty.warning(getContext(), "Invalid price input", Toast.LENGTH_SHORT, true).show();
+
             }
             dialog.dismiss();
         });
@@ -198,11 +201,23 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
 
 
 
-    private void addNewPending(int position ,String price , String note,String pair,String date,String dir,String visible_lable){
-        pendingPrices.add(new PendingPrice(price,pair,visible_lable,date,note,"Not","Null",dir));
+    private void addNewPending(int position ,String price , String note,String pair,String date,String dir,String visible_lable,int realPos){
+        pendingPrices.add(new PendingPrice(price,pair,visible_lable,date,note,"Not","Null",dir,realPos));
+//        setting the alert number
+        ForexCurrency tempCurrency=currencies.get(position);
+        tempCurrency.setAlertNumber(tempCurrency.getAlertNumber()+1);
+        currencies.set(position,tempCurrency);
         adapter.notifyItemChanged(position);
+//        TODO To remove
+        ArrayList<PendingPrice> temp = new ArrayList<>();
+        temp.addAll(pendingPrices);
+        pendingPrices.clear();
+        pendingPrices.addAll(SortPending.sort(temp));
+
+        //        TODO To remove up
+        saved_file_curencies();
         try {
-            mainActivityInterface.UpdatePendingMainActivity().refreshUIFromForex(new PendingPrice(price,pair,visible_lable,date,note,"Not","Null",dir));
+            mainActivityInterface.UpdatePendingMainActivity().refreshUIFromForex(new PendingPrice(price,pair,visible_lable,date,note,"Not","Null",dir,realPos));
         }catch (Exception e){
             saved_file_pending();
         }
@@ -263,9 +278,20 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
     }
 
     @Override
-    public void refreshUIFromPending(int pos) {
+    public void refreshUIFromPending(int pos,int realPos) {
         pendingPrices.remove(pos);
-        adapter.notifyDataSetChanged();
+        //        TODO To remove
+        ArrayList<PendingPrice> temp = new ArrayList<>();
+        temp.addAll(pendingPrices);
+        pendingPrices.clear();
+        pendingPrices.addAll(SortPending.sort(temp));
+        //        TODO To remove up
+        ForexCurrency tempCurrency=currencies.get(realPos);
+        tempCurrency.setAlertNumber(tempCurrency.getAlertNumber()-1);
+        currencies.set(realPos,tempCurrency);
+        adapter.notifyItemChanged(realPos);
+
+        saved_file_curencies();
         saved_file();
     }
 
@@ -283,30 +309,38 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
         ArrayList<PendingPrice> pendingPrices=new Gson().fromJson(readJsonData1, listType2);
 
 
-        if(currencies==null){
+
+        if(currencies != null){
             currencies=new ArrayList<ForexCurrency>();
-            currencies.add(new ForexCurrency( "USA30", "@",  0,0,1));
-            currencies.add(new ForexCurrency( "XAU","USD",  0,0,3));
-            currencies.add(new ForexCurrency("GBP", "USD",  0,0,5));
-            currencies.add(new ForexCurrency("GBP","JPY",  0,0,3));
-            currencies.add(new ForexCurrency("EUR", "USD",  0,0,5));
-            currencies.add(new ForexCurrency("EUR","JPY",  0,0,3));
-            currencies.add(new ForexCurrency( "USD","JPY",  0,0,3));
-            currencies.add(new ForexCurrency( "USD","CAD",  0,0,5));
-            currencies.add(new ForexCurrency("USD","CHF",  0,0,5));
-            currencies.add(new ForexCurrency("CAD","JPY",  0,0,3));
-            currencies.add(new ForexCurrency("CAD","CHF",  0,0,5));
-            currencies.add(new ForexCurrency("CHF","JPY",  0,0,3));
-            currencies.add(new ForexCurrency("NZD","CAD",  0,0,5));
-            currencies.add(new ForexCurrency("XAG","USD",  0,0,3));
-            currencies.add(new ForexCurrency("OIL","@",  0,0,3));
+            currencies.add(new ForexCurrency( "USA30", "@",  0,0,1,0));
+            currencies.add(new ForexCurrency( "NAS100", "@",  0,0,2,1));
+            currencies.add(new ForexCurrency( "USDX", "@",  0,0,1,2));
+            currencies.add(new ForexCurrency( "XAU","USD",  0,0,3,3));
+            currencies.add(new ForexCurrency("GBP", "USD",  0,0,5,4));
+            currencies.add(new ForexCurrency("GBP","JPY",  0,0,3,5));
+            currencies.add(new ForexCurrency("EUR", "USD",  0,0,5,6));
+            currencies.add(new ForexCurrency("EUR","JPY",  0,0,3,7));
+            currencies.add(new ForexCurrency( "USD","JPY",  0,0,3,8));
+            currencies.add(new ForexCurrency( "USD","CAD",  0,0,5,9));
+            currencies.add(new ForexCurrency("USD","CHF",  0,0,5,10));
+            currencies.add(new ForexCurrency("CAD","JPY",  0,0,3,11));
+            currencies.add(new ForexCurrency("CAD","CHF",  0,0,5,12));
+            currencies.add(new ForexCurrency("CHF","JPY",  0,0,3,13));
+            currencies.add(new ForexCurrency("NZD","CAD",  0,0,5,14));
+            currencies.add(new ForexCurrency("XAG","USD",  0,0,3,15));
+            currencies.add(new ForexCurrency("OIL","@",  0,0,3,16));
+
+
 
             // save to local
             Gson gson = new Gson();
             String jsonData = gson.toJson(currencies);
             StorageUtils.writeJsonToFile(getContext(), FILE_NAME_CURRENCIES_LOCAL, jsonData);
         }
-        if(pendingPrices==null){
+
+
+
+        if(pendingPrices!=null){
             pendingPrices=new ArrayList<PendingPrice>();
 
             // save to local
@@ -318,6 +352,30 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
 
         forexCurrencies.addAll(currencies);
         pendingPricesForex.addAll(pendingPrices);
+
+//        ArrayList<PendingPrice>  NewPendingPriceslist=new ArrayList<>();
+//        for (int i = 0; i < pendingPrices.size(); i++) {
+//
+//            for (int n = 0; n < currencies.size(); n++) {
+//                if (pendingPrices.get(i).getPair_visible().equals(currencies.get(n).getBaseCurrency() + "/" + currencies.get(n).getQuoteCurrency()) ) {
+//
+//                    Log.d("Forex-pending-Pairs",pendingPrices.get(i).getPair_visible()+"==="+currencies.get(n).getBaseCurrency() + "/" + currencies.get(n).getQuoteCurrency() );
+//
+//                    PendingPrice tempPrice = pendingPrices.get(i);
+//                    tempPrice.setPosFromCurrency(currencies.get(n).getPosition());
+//                    NewPendingPriceslist.add(tempPrice);
+//                }
+//            }
+//
+//
+//        }
+//
+//
+//        pendingPricesForex.clear();
+//        pendingPricesForex.addAll(NewPendingPriceslist);
+//        saved_file();
+
+
         adapter.notifyDataSetChanged();
 
         return true;
@@ -333,6 +391,8 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
         // SAVE DATA
         String jsonData = gson.toJson(pendingPrices);
         StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_FOREX_LOCAL, jsonData);
+//        TODO:to remove
+//        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData);
 
     }
     public  void saved_files(){
@@ -360,6 +420,20 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
         // SAVE DATA
         String jsonData = gson.toJson(pendingPrices);
         StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData);
+
+
+    }
+
+    public  void saved_file_curencies(){
+        Gson gson = new Gson();
+        //CLEAR
+        ArrayList<ForexCurrency> clear_list=new ArrayList<>();
+        String jsonData_ = gson.toJson(clear_list);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_CURRENCIES_LOCAL, jsonData_);
+
+        // SAVE DATA
+        String jsonData = gson.toJson(currencies);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_CURRENCIES_LOCAL, jsonData);
 
     }
 
@@ -389,7 +463,11 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
         pendingPrices.clear();
 
         pendingPrices.addAll(pendingPrices_);
+
+
+
         Log.d("MainActivity-Broadcast", "broadcast forex =="+String.valueOf(pendingPrices.size()));
+
         adapter.notifyDataSetChanged();
 
     }

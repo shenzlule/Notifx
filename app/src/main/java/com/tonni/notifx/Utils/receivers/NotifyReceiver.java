@@ -12,12 +12,11 @@ import com.tonni.notifx.Utils.workers.NotifyWorker;
 public class NotifyReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(NotifyWorker.class).build();
-        WorkManager.getInstance(context).enqueue(workRequest);
+//        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(NotifyWorker.class).build();
+//        WorkManager.getInstance(context).enqueue(workRequest);
         OneTimeWorkRequest fetch_workRequest = new OneTimeWorkRequest.Builder(FetchWorker.class).build();
         WorkManager.getInstance(context).enqueue(fetch_workRequest);
     }
-
 
 
 }

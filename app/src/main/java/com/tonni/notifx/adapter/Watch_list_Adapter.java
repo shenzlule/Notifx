@@ -15,7 +15,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.tonni.notifx.R;
-import com.tonni.notifx.frags.PendingFragment;
+import com.tonni.notifx.Utils.TimeConverter;
+import com.tonni.notifx.frags.WatchFragment;
 import com.tonni.notifx.models.PendingPrice;
 
 import java.math.RoundingMode;
@@ -25,15 +26,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class PendingAdapter extends RecyclerView.Adapter<PendingAdapter.ViewHolder> {
+import es.dmoral.toasty.Toasty;
 
-    private PendingFragment pendingFragment;
-    private static  final DecimalFormat decfor = new DecimalFormat("0.0");
+public class Watch_list_Adapter extends RecyclerView.Adapter<Watch_list_Adapter.ViewHolder> {
+
+    private WatchFragment watchFragment;
+    private static  final DecimalFormat decfor = new DecimalFormat("0.000");
     List<PendingPrice> pendingPrices_list;
     Context context;
 
-    public PendingAdapter(PendingFragment pendingFragment, List<PendingPrice> pendingPrices, Context context) {
-        this.pendingFragment = pendingFragment;
+    public Watch_list_Adapter(WatchFragment watchFragment, List<PendingPrice> pendingPrices, Context context) {
+        this.watchFragment = watchFragment;
         this.pendingPrices_list =pendingPrices;
         this.context=context;
     }
@@ -62,13 +65,14 @@ public class PendingAdapter extends RecyclerView.Adapter<PendingAdapter.ViewHold
             holder.price.setText("Price: " + String.valueOf(pendingPrice.getPrice()));
             holder.pending_mar_notes.setText(String.valueOf(pendingPrice.getNote()));
             holder.date.setText(String.valueOf("Date: " + convertMillisToDateString(Long.parseLong(pendingPrice.getDate()))));
-            holder.elp.setText(String.valueOf("Elapsed hours: " + decfor.format(elapsedHours)));
+            holder.elp.setText(String.valueOf("ET: " + TimeConverter.convertHours(Double.parseDouble(decfor.format(elapsedHours)))));
             holder.pending_mar_notes.setSelected(true);
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(context, "On watch for price to move "+pendingPrice.getDirection()+" "+pendingPrice.getPrice(), Toast.LENGTH_SHORT).show();
+                    Toasty.info(context, "On watch for price to move "+pendingPrice.getDirection()+" "+pendingPrice.getPrice(), Toast.LENGTH_SHORT, true).show();
+
                 }
             });
 
@@ -83,7 +87,7 @@ public class PendingAdapter extends RecyclerView.Adapter<PendingAdapter.ViewHold
                                 public void onClick(DialogInterface dialog, int which) {
 
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                            pendingFragment.deletePendingPos( holder.getAdapterPosition());
+                                            watchFragment.deletePendingPos( holder.getAdapterPosition());
                                         }
                                 }
                             })

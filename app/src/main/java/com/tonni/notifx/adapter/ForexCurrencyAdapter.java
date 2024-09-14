@@ -39,22 +39,22 @@ public class ForexCurrencyAdapter extends RecyclerView.Adapter<ForexCurrencyAdap
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ForexCurrency forexCurrency = forexCurrencyList.get(position);
-        int alertTracker = 0;
-
-        for (int i = 0; i < pendingPrices.size(); i++) {
-            Log.d("MainActivity-Pairs",pendingPrices.get(i).getPair_visible()+"==="+forexCurrency.getBaseCurrency() + "/" + forexCurrency.getQuoteCurrency() );
-
-            if (pendingPrices.get(i).getPair_visible().equals(forexCurrency.getBaseCurrency() + "/" + forexCurrency.getQuoteCurrency()) && pendingPrices.get(i).getFilled().equals("Not")) {
-                alertTracker++;
-            }
-
-        }
+//        int alertTracker = 0;
+//
+//        for (int i = 0; i < pendingPrices.size(); i++) {
+//            Log.d("MainActivity-Pairs",pendingPrices.get(i).getPair_visible()+"==="+forexCurrency.getBaseCurrency() + "/" + forexCurrency.getQuoteCurrency() );
+//
+//            if (pendingPrices.get(i).getPair_visible().equals(forexCurrency.getBaseCurrency() + "/" + forexCurrency.getQuoteCurrency()) && pendingPrices.get(i).getFilled().equals("Not")) {
+//                alertTracker++;
+//            }
+//
+//        }
         holder.currencyPair.setText(forexCurrency.getBaseCurrency() + "/" + forexCurrency.getQuoteCurrency());
-        holder.alertNumber.setText(String.valueOf(alertTracker));
+        holder.alertNumber.setText(String.valueOf(forexCurrency.getAlertNumber()));
         holder.pending_mar.setSelected(true);
 
         holder.itemView.setOnClickListener(v -> forexFragment.showInputDialog(position, forexCurrency));
-        alertTracker = 0;
+//        alertTracker = 0;
     }
 
     @Override

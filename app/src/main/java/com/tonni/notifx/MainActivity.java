@@ -1,11 +1,8 @@
 package com.tonni.notifx;
 
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ReactiveGuide;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -20,11 +17,9 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -33,7 +28,6 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -46,26 +40,23 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.tonni.notifx.Utils.Storage.StorageUtils;
-import com.tonni.notifx.Utils.receivers.OverlayReceiver;
 import com.tonni.notifx.Utils.scheduler.NotificationScheduler;
 import com.tonni.notifx.Utils.workers.NewsExpireWorker;
 import com.tonni.notifx.Utils.workers.NewsWorker;
-import com.tonni.notifx.Utils.workers.NotifyWorker;
 import com.tonni.notifx.Utils.workers.setNewsAlarmOnLoadWorker;
 import com.tonni.notifx.frags.FilledFragment;
 import com.tonni.notifx.frags.ForexFragment;
-import com.tonni.notifx.frags.HistoryFragment;
+import com.tonni.notifx.frags.Journal;
 import com.tonni.notifx.frags.NewsFragment;
-import com.tonni.notifx.frags.PendingFragment;
+import com.tonni.notifx.frags.WatchFragment;
+import com.tonni.notifx.frags.stats.PieChartFrag;
 import com.tonni.notifx.inter.MainActivityInterface;
 import com.tonni.notifx.inter.MainReturnForexCurrencyInterface;
 import com.tonni.notifx.inter.RefreshableFragment;
-import com.tonni.notifx.models.NotifAlertModel;
 import com.tonni.notifx.models.PendingPrice;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import es.dmoral.toasty.Toasty;
@@ -89,10 +80,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private ImageView btnSaveJson,btnOpenFolder;
 
 
-    public HistoryFragment fragmentHistory;
+    public PieChartFrag fragmentHistory;
     public NewsFragment fragmentNews;
     public FilledFragment fragmentFilled;
-    public PendingFragment fragmentPending;
+    public WatchFragment fragmentWatch_list;
+    public Journal fragmentJournal;
     private ProgressBar progressBar;
     public ForexFragment fragmentPair;
     private static final int REQUEST_WRITE_STORAGE = 112;
@@ -151,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
                         }
                         try {
-                            fragmentPending.getLocalFile_main();
+                            fragmentWatch_list.getLocalFile_main();
 
                         }catch (Exception e){
 
@@ -238,9 +230,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
         fragmentNews=new NewsFragment();
         fragmentPair=new ForexFragment();
-        fragmentPending=new PendingFragment();
+        fragmentWatch_list =new WatchFragment();
         fragmentFilled=new FilledFragment();
-        fragmentHistory=new HistoryFragment();
+        fragmentHistory=new PieChartFrag();
+        fragmentJournal=new Journal();
 
         boolean hasPermission = (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
@@ -373,7 +366,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
                         }
                         try {
-                            fragmentPending.getLocalFile_main();
+                            fragmentWatch_list.getLocalFile_main();
 
                         } catch (Exception e) {
 
@@ -412,7 +405,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
                         }
                         try {
-                            fragmentPending.getLocalFile_main();
+                            fragmentWatch_list.getLocalFile_main();
 
                         } catch (Exception e) {
 
@@ -470,10 +463,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         adapter = new ViewPagerAdapter(this);
 
         adapter.addFragment(fragmentPair, "Pairs");
-        adapter.addFragment(fragmentPending, "Watch");
-        adapter.addFragment(fragmentHistory, "Api");
+        adapter.addFragment(fragmentWatch_list, "Watch list");
         adapter.addFragment(fragmentFilled, "Filled");
         adapter.addFragment(fragmentNews, "News");
+        adapter.addFragment(fragmentHistory, "Stats");
+        adapter.addFragment(fragmentJournal, "Journal");
 
 
         viewPager.setAdapter(adapter);
@@ -520,8 +514,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     }
 
     @Override
-    public PendingFragment UpdatePendingMainActivity() {
-        return fragmentPending;
+    public WatchFragment UpdatePendingMainActivity() {
+        return fragmentWatch_list;
     }
 
     @Override
@@ -532,7 +526,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
     @Override
     public Fragment getFrag() {
-        return fragmentPending;
+        return fragmentWatch_list;
     }
 
     private static class ViewPagerAdapter extends FragmentStateAdapter {

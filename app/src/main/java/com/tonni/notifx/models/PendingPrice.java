@@ -9,8 +9,9 @@ public class PendingPrice {
     private String filled;
     private   String date_filled;
     private   String direction;
+    private   int posFromCurrency;
 
-    public PendingPrice(String price, String pair, String pair_visible, String date, String note, String filled, String date_filled, String direction) {
+    public PendingPrice(String price, String pair, String pair_visible, String date, String note, String filled, String date_filled, String direction, int posFromCurrency) {
         this.price = price;
         this.pair = pair;
         this.pair_visible = pair_visible;
@@ -19,6 +20,7 @@ public class PendingPrice {
         this.filled = filled;
         this.date_filled = date_filled;
         this.direction = direction;
+        this.posFromCurrency = posFromCurrency;
     }
 
     public String getPrice() {
@@ -83,5 +85,14 @@ public class PendingPrice {
 
     public void setPair_visible(String pair_visible) {
         this.pair_visible = pair_visible;
+    }
+
+
+    public int getPosFromCurrency() {
+        return posFromCurrency;
+    }
+
+    public void setPosFromCurrency(int posFromCurrency) {
+        this.posFromCurrency = posFromCurrency;
     }
 }

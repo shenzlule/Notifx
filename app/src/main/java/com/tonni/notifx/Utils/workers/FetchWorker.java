@@ -258,10 +258,10 @@ public class FetchWorker extends Worker {
                                                         Notification notification = new NotificationCompat.Builder(context, channelId)
                                                                 .setContentTitle("Watch list [" + pendingList.get(j).getPair() + "]")
                                                                 .setContentText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
-                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
-                                                                .setSmallIcon(R.drawable.notif)
+                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getNote())) // For longer text                                                                .setSmallIcon(R.drawable.notif)
                                                                 .addAction(R.drawable.ic_baseline_delete_forever_24, "Remove", stopPendingIntent) // Add stop button to notification
                                                                 .setOngoing(true) // Make the notification ongoing
+                                                                .setSmallIcon(R.drawable.notif)
                                                                 .setAutoCancel(false)
                                                                 .setVibrate(new long[]{1000, 1000, 1000, 1000})
                                                                 .build();
@@ -298,10 +298,10 @@ public class FetchWorker extends Worker {
                                                         Notification notification = new NotificationCompat.Builder(context, channelId)
                                                                 .setContentTitle("Watch list [" + pendingList.get(j).getPair() + "]")
                                                                 .setContentText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
-                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
-                                                                .setSmallIcon(R.drawable.notif)
+                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getNote())) // For longer text                                                                .setSmallIcon(R.drawable.notif)
                                                                 .addAction(R.drawable.ic_baseline_delete_forever_24, "Remove", stopPendingIntent) // Add stop button to notification
                                                                 .setOngoing(true) // Make the notification ongoing
+                                                                .setSmallIcon(R.drawable.notif)
                                                                 .setAutoCancel(false)
                                                                 .setVibrate(new long[]{1000, 1000, 1000, 1000})
                                                                 .build();
@@ -318,8 +318,6 @@ public class FetchWorker extends Worker {
 
                                         }
 
-                                        Intent intent= new Intent("android.intent.action.WithInMain");
-                                        context.sendBroadcast(intent);
 
 
                                     } else if (apiResponse.getQuotes().get(i).getInstrument() != null) {
@@ -364,7 +362,7 @@ public class FetchWorker extends Worker {
                                                         Notification notification = new NotificationCompat.Builder(context, channelId)
                                                                 .setContentTitle("Watch list [" + pendingList.get(j).getPair() + "]")
                                                                 .setContentText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
-                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
+                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getNote())) // For longer text
                                                                 .setSmallIcon(R.drawable.notif)
                                                                 .setAutoCancel(false)
                                                                 .setVibrate(new long[]{1000, 1000, 1000, 1000})
@@ -404,10 +402,10 @@ public class FetchWorker extends Worker {
                                                         Notification notification = new NotificationCompat.Builder(context, channelId)
                                                                 .setContentTitle("Watch list [" + pendingList.get(j).getPair() + "]")
                                                                 .setContentText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")
-                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getPair() + " price  moves " + pendingList.get(j).getDirection() + " " + pendingList.get(j).getPrice() + " " + "level")) // For longer text
-                                                                .setSmallIcon(R.drawable.notif)
+                                                                .setStyle(new NotificationCompat.BigTextStyle().bigText(pendingList.get(j).getNote())) // For longer text                                                                .setSmallIcon(R.drawable.notif)
                                                                 .addAction(R.drawable.ic_baseline_delete_forever_24, "Remove", stopPendingIntent) // Add stop button to notification
                                                                 .setVibrate(new long[]{1000, 1000, 1000, 1000})
+                                                                .setSmallIcon(R.drawable.notif)
                                                                 .setOngoing(true) // Make the notification ongoing
                                                                 .setAutoCancel(false)
                                                                 .build();
@@ -434,6 +432,8 @@ public class FetchWorker extends Worker {
 
                             boolean isNewNots=count_notification_[0]<count_notification[0];
                             if(isNewNots){
+                                Intent intent= new Intent("android.intent.action.WithInMain");
+                                context.sendBroadcast(intent);
                                 finalNotifcation_list.get(0).setNotification_Reminder(1);
                                 ReminderScheduler.scheduleReminder(context);
                             }

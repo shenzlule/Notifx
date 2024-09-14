@@ -2,5 +2,5 @@ package com.tonni.notifx.inter;
 
 public interface ForexCurrencyInterface {
   void UpdateUI();
-  void refreshUIFromPending(int pos);
+  void refreshUIFromPending(int pos,int realPos);
 }
