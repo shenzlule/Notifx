@@ -310,7 +310,7 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
 
 
 
-        if(currencies != null){
+        if(currencies == null){
             currencies=new ArrayList<ForexCurrency>();
             currencies.add(new ForexCurrency( "USA30", "@",  0,0,1,0));
             currencies.add(new ForexCurrency( "NAS100", "@",  0,0,2,1));
@@ -340,7 +340,7 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
 
 
 
-        if(pendingPrices!=null){
+        if(pendingPrices==null){
             pendingPrices=new ArrayList<PendingPrice>();
 
             // save to local

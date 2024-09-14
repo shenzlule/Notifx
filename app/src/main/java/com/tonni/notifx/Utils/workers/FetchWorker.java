@@ -28,6 +28,7 @@ import com.tonni.notifx.Utils.receivers.NotificationActionReceiver;
 import com.tonni.notifx.Utils.scheduler.ReminderScheduler;
 import com.tonni.notifx.api.ApiResponse;
 import com.tonni.notifx.models.ApiTurn;
+import com.tonni.notifx.models.ForexCurrency;
 import com.tonni.notifx.models.NotifWatchlistModel;
 import com.tonni.notifx.models.PendingPrice;
 
@@ -54,6 +55,8 @@ public class FetchWorker extends Worker {
     private static final String FILE_NAME_PENDING_FOREX_LOCAL = "pending_forex.json";
     private static final String FILE_NAME_PENDING_LOCAL = "pending_pending.json";
     private static final String FILE_NAME_NOTIFICATION = "notification.json";
+    private static final String FILE_NAME_CURRENCIES_LOCAL = "currencies.json";
+
 
     private static final int MAX_PRIORITY = 10;
     private String queryUrl = URL + "?currency=" + CURRENCY + "&api_key=" + API_KEY;
@@ -189,6 +192,8 @@ public class FetchWorker extends Worker {
 
                         // Load Forex news items from JSON
                         String readJsonData = StorageUtils.readJsonFromFile(context, FILE_NAME_PENDING);
+                        String readJsonData_currencies = StorageUtils.readJsonFromFile(context, FILE_NAME_CURRENCIES_LOCAL);
+
 //        Toast.makeText(getContext(), "Read JSON: " + readJsonData, Toast.LENGTH_SHORT).show();
                         Log.d("MainActivity-Watch_list", apiResponse.toString());
 
@@ -198,6 +203,11 @@ public class FetchWorker extends Worker {
                         }.getType();
                         List<PendingPrice> pendingList = new Gson().fromJson(readJsonData, listType);
                         ArrayList<PendingPrice> pendingList_copy = new ArrayList<>(pendingList);
+
+                        Type listType_currencies = new TypeToken<List<ForexCurrency>>() {
+                        }.getType();
+                        List<ForexCurrency> currencies = new Gson().fromJson(readJsonData_currencies, listType_currencies);
+                        ArrayList<ForexCurrency> currencies_copy = new ArrayList<>(currencies);
 
                         for (int i = 0; i < apiResponse.getQuotes().size(); i++) {
                             Log.d("MainActivity-Qutoes", apiResponse.getQuotes().get(i).toString());
@@ -234,6 +244,10 @@ public class FetchWorker extends Worker {
                                                     if (price > price_) {
                                                         pendingList_copy.get(j).setFilled("Yes");
                                                         pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+
+                                                        int prevAlertNumber=currencies.get(pendingList_copy.get(j).getPosFromCurrency()).getAlertNumber();
+                                                        currencies.get(pendingList_copy.get(j).getPosFromCurrency()).setAlertNumber(prevAlertNumber-1);
+
                                                         finalFilled_list.add(pendingList_copy.get(j));
                                                         Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
 
@@ -274,6 +288,8 @@ public class FetchWorker extends Worker {
                                                     if (price < price_) {
                                                         pendingList_copy.get(j).setFilled("Yes");
                                                         pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+                                                        int prevAlertNumber=currencies.get(pendingList_copy.get(j).getPosFromCurrency()).getAlertNumber();
+                                                        currencies.get(pendingList_copy.get(j).getPosFromCurrency()).setAlertNumber(prevAlertNumber-1);
                                                         finalFilled_list.add(pendingList_copy.get(j));
                                                         Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
 
@@ -338,6 +354,8 @@ public class FetchWorker extends Worker {
                                                     if (price > price_) {
                                                         pendingList_copy.get(j).setFilled("Yes");
                                                         pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+                                                        int prevAlertNumber=currencies.get(pendingList_copy.get(j).getPosFromCurrency()).getAlertNumber();
+                                                        currencies.get(pendingList_copy.get(j).getPosFromCurrency()).setAlertNumber(prevAlertNumber-1);
                                                         finalFilled_list.add(pendingList_copy.get(j));
                                                         Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
                                                         int id_=count_notification[0]++;
@@ -378,6 +396,8 @@ public class FetchWorker extends Worker {
                                                     if (price < price_) {
                                                         pendingList_copy.get(j).setFilled("Yes");
                                                         pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+                                                        int prevAlertNumber=currencies.get(pendingList_copy.get(j).getPosFromCurrency()).getAlertNumber();
+                                                        currencies.get(pendingList_copy.get(j).getPosFromCurrency()).setAlertNumber(prevAlertNumber-1);
                                                         finalFilled_list.add(pendingList_copy.get(j));
                                                         Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
 
@@ -431,12 +451,13 @@ public class FetchWorker extends Worker {
 
 
                             boolean isNewNots=count_notification_[0]<count_notification[0];
-                            if(isNewNots){
-                                Intent intent= new Intent("android.intent.action.WithInMain");
-                                context.sendBroadcast(intent);
-                                finalNotifcation_list.get(0).setNotification_Reminder(1);
-                                ReminderScheduler.scheduleReminder(context);
-                            }
+
+
+
+                        if(isNewNots){
+//
+
+
                             addNewPending(pendingList_copy, context);
                             String jsonData_turn_list = gson.toJson(finalTurnList);
                             finalNotifcation_list.get(0).setNotification_id_watch_list(count_notification[0]);
@@ -445,6 +466,14 @@ public class FetchWorker extends Worker {
                             StorageUtils.writeJsonToFile(context, FILE_NAME_NOTIFICATION, jsonData_notification_list);
                             String jsonData_filled_list = gson.toJson(finalFilled_list);
                             StorageUtils.writeJsonToFile(context, FILE_NAME_FILLED_LOCAL, jsonData_filled_list);
+                            saved_file(context,currencies_copy);
+
+//                            Alert
+                            Intent intent= new Intent("android.intent.action.WithInMain");
+                            context.sendBroadcast(intent);
+                            finalNotifcation_list.get(0).setNotification_Reminder(1);
+                            ReminderScheduler.scheduleReminder(context);
+                        }
                         }
 
                 },
@@ -563,6 +592,22 @@ public class FetchWorker extends Worker {
 
 
         return querry_pairs;
+    }
+
+
+    public  void saved_file(Context context, ArrayList<ForexCurrency> currencies){
+        Gson gson = new Gson();
+        //CLEAR
+        ArrayList<ForexCurrency> clear_list=new ArrayList<>();
+        String jsonData_ = gson.toJson(clear_list);
+        StorageUtils.writeJsonToFile(context, FILE_NAME_PENDING_FOREX_LOCAL, jsonData_);
+
+        // SAVE DATA
+        String jsonData = gson.toJson(currencies);
+        StorageUtils.writeJsonToFile(context, FILE_NAME_PENDING_FOREX_LOCAL, jsonData);
+//        TODO:to remove
+//        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData);
+
     }
 
 }
