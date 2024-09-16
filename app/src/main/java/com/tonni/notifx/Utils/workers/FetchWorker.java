@@ -489,6 +489,7 @@ public class FetchWorker extends Worker {
                         saved_file_api_count(context,finalApi_count_list);
 
                         Intent intent_api_count= new Intent("android.intent.action.WithInMain_api_count");
+                        context.sendBroadcast(intent_api_count);
 
 
                         if(isNewNots){
@@ -497,6 +498,7 @@ public class FetchWorker extends Worker {
                             addNewPending(pendingList_copy, context);
                             String jsonData_turn_list = gson.toJson(finalTurnList);
                             finalNotifcation_list.get(0).setNotification_id_watch_list(count_notification[0]);
+                            finalNotifcation_list.get(0).setNotification_Reminder(1);
                             String jsonData_notification_list = gson.toJson(finalNotifcation_list);
                             StorageUtils.writeJsonToFile(context, FILE_NAME_TURN, jsonData_turn_list);
                             StorageUtils.writeJsonToFile(context, FILE_NAME_NOTIFICATION, jsonData_notification_list);
@@ -507,7 +509,6 @@ public class FetchWorker extends Worker {
 //                            Alert
                             Intent intent= new Intent("android.intent.action.WithInMain");
                             context.sendBroadcast(intent);
-                            finalNotifcation_list.get(0).setNotification_Reminder(1);
                             ReminderScheduler.scheduleReminder(context);
                         }
                         }
@@ -546,6 +547,7 @@ public class FetchWorker extends Worker {
 
                         saved_file_api_count(context,finalApi_count_list);
                         Intent intent_api_count= new Intent("android.intent.action.WithInMain_api_count");
+                        context.sendBroadcast(intent_api_count);
 
 
 
@@ -655,11 +657,16 @@ public class FetchWorker extends Worker {
         //CLEAR
         ArrayList<ForexCurrency> clear_list=new ArrayList<>();
         String jsonData_ = gson.toJson(clear_list);
-        StorageUtils.writeJsonToFile(context, FILE_NAME_PENDING_FOREX_LOCAL, jsonData_);
+        StorageUtils.writeJsonToFile(context, FILE_NAME_CURRENCIES_LOCAL, jsonData_);
+
+
 
         // SAVE DATA
         String jsonData = gson.toJson(currencies);
-        StorageUtils.writeJsonToFile(context, FILE_NAME_PENDING_FOREX_LOCAL, jsonData);
+
+        Log.d("MainActivity-Api-worker", "<<<<<<< " +jsonData+" >>>>>>>");
+
+        StorageUtils.writeJsonToFile(context, FILE_NAME_CURRENCIES_LOCAL, jsonData);
 //        TODO:to remove
 //        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData);
 

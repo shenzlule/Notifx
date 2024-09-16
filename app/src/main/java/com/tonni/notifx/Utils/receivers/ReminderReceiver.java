@@ -53,12 +53,12 @@ public class ReminderReceiver extends BroadcastReceiver {
             // Create an intent
             intent2.setAction("REMINDER");
 
-            Log.d("REMINDER", "REMINDER SET canceled ");
+            Log.d("REMINDER", "REMINDER SET canceled  ");
 
             intent2.putExtra("delete", "yes");
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 67676, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
             alarmManager.cancel(pendingIntent);
-            Log.d("REMINDER", "REMINDER canceled");
+            Log.d("REMINDER", "REMINDER canceled ");
         }
 
         if ("REMINDER_delete".equals(intent.getAction().toString())){
@@ -68,6 +68,8 @@ public class ReminderReceiver extends BroadcastReceiver {
                 // Remove the notification
                 NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                 notificationManager.cancel(67676);
+                Log.d("REMINDER", "REMINDER SET canceled - null ");
+
             }else {
                 if (notifcation_list.get(0).getNotification_Reminder() == 1) {
                     notifcation_list.get(0).setNotification_Reminder(0);
@@ -76,12 +78,12 @@ public class ReminderReceiver extends BroadcastReceiver {
                     // Create an intent
                     intent2.setAction("REMINDER");
 
-                    Log.d("REMINDER", "REMINDER SET canceled ");
+                    Log.d("REMINDER", "REMINDER SET canceled -not null ");
 
                     intent2.putExtra("delete", "yes");
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 67676, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
                     alarmManager.cancel(pendingIntent);
-                    Log.d("REMINDER", "REMINDER canceled");
+                    Log.d("REMINDER", "REMINDER canceled  not null");
 
                     Gson gson = new Gson();
                     String jsonData_ = gson.toJson(notifcation_list);

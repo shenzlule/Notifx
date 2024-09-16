@@ -17,16 +17,22 @@ public class SortPending {
 
         pendingPricesList.addAll(pendingPrices);
 
-        Collections.sort(pendingPricesList, new Comparator<PendingPrice>() {
-            @Override
-            public int compare(PendingPrice o1, PendingPrice o2) {
-                return o1.getPair_visible().compareTo(o2.getPair_visible());
+        if(pendingPricesList !=null) {
+
+            Collections.sort(pendingPricesList, new Comparator<PendingPrice>() {
+                @Override
+                public int compare(PendingPrice o1, PendingPrice o2) {
+                    return o1.getPair_visible().compareTo(o2.getPair_visible());
+                }
+            });
+
+            for (int i = 0; i < pendingPricesList.size(); i++) {
+                Log.d("Sorted", pendingPricesList.get(i).getPair_visible());
+
             }
-        });
 
-        for (int i = 0; i < pendingPricesList.size(); i++) {
-            Log.d("Sorted", pendingPricesList.get(i).getPair_visible());
-
+        }else {
+            Log.d("Sorted","Null Array");
         }
 
 

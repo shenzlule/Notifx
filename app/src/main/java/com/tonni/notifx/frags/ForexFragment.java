@@ -300,6 +300,8 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
         // Load  items from JSON
         String readJsonData1 = StorageUtils.readJsonFromFile(getContext(), FILE_NAME_PENDING_FOREX_LOCAL);
         String readJsonData2 = StorageUtils.readJsonFromFile(getContext(), FILE_NAME_CURRENCIES_LOCAL);
+        Log.d("CURRENCIES_FOREX_LOCAL",readJsonData2 );
+
 
         // Parse JSON data
         Type listType1 = new TypeToken<List<ForexCurrency>>() {}.getType();
@@ -443,15 +445,15 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
 
         Log.d("MainActivity-Broadcast", "broadcast forex");
         // Load  items from JSON
-        String readJsonData1 = StorageUtils.readJsonFromFile(getContext(), FILE_NAME_PENDING_FOREX_LOCAL);
+        String readJsonData1 = StorageUtils.readJsonFromFile(getContext(), FILE_NAME_CURRENCIES_LOCAL);
 
 
-        Type listType2 = new TypeToken<List<PendingPrice>>() {}.getType();
-        ArrayList<PendingPrice> pendingPrices_=new Gson().fromJson(readJsonData1, listType2);
+        Type listType2 = new TypeToken<List<ForexCurrency>>() {}.getType();
+        ArrayList<ForexCurrency> forexCurrencies=new Gson().fromJson(readJsonData1, listType2);
 
 
-        if(pendingPrices_==null){
-            pendingPrices_=new ArrayList<PendingPrice>();
+        if(forexCurrencies==null){
+            forexCurrencies=new ArrayList<ForexCurrency>();
 
             // save to local
             Gson gson = new Gson();
@@ -460,13 +462,13 @@ public class ForexFragment extends Fragment implements RefreshableFragment, Fore
 
         }
 
-        pendingPrices.clear();
+        currencies.clear();
 
-        pendingPrices.addAll(pendingPrices_);
+        currencies.addAll(forexCurrencies);
 
 
 
-        Log.d("MainActivity-Broadcast", "broadcast forex =="+String.valueOf(pendingPrices.size()));
+        Log.d("MainActivity-Broadcast", "broadcast forex =="+String.valueOf(currencies.size()));
 
         adapter.notifyDataSetChanged();
 

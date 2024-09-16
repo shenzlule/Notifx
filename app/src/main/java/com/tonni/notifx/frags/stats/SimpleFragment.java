@@ -115,7 +115,7 @@ public abstract class SimpleFragment extends Fragment {
      */
     protected PieData generatePieData() {
 
-        int count = 2;
+        int count = 3;
 
         ArrayList<PieEntry> entries1 = new ArrayList<>();
 
@@ -127,9 +127,11 @@ public abstract class SimpleFragment extends Fragment {
         }.getType();
         ArrayList<ApiCount> api_count_list = new Gson().fromJson(readJsonData_Api_Count, listType_api_count);
 
-        if (api_count_list==null){
+        if (true){
             api_count_list=new ArrayList<>();
             api_count_list.add(0,new ApiCount(500,500,500,500));
+            api_count_list.set(0,new ApiCount(500,500,500,500));
+
 
         }
 
@@ -138,8 +140,10 @@ public abstract class SimpleFragment extends Fragment {
 
             if (i==1){
                 entries1.add(new PieEntry((float) ((api_count_list.get(0).getApi_count_success_1()/2000)*360), "Api " + (i+1)));
-            }else{
+            }else if(i==0) {
                 entries1.add(new PieEntry((float) ((api_count_list.get(0).getApi_count_success_2()/2000)*360), "Api " + (i+1)));
+            }else {
+                entries1.add(new PieEntry((float) (((2000-(api_count_list.get(0).getApi_count_success_1()+api_count_list.get(0).getApi_count_success_2()))/2000)*360), "Api " + (i+1)));
             }
         }
 
@@ -157,7 +161,7 @@ public abstract class SimpleFragment extends Fragment {
 
     protected PieData generatePieData_fails() {
 
-        int count = 2;
+        int count = 3;
 
         ArrayList<PieEntry> entries1 = new ArrayList<>();
 
@@ -169,9 +173,11 @@ public abstract class SimpleFragment extends Fragment {
         }.getType();
         ArrayList<ApiCount> api_count_list = new Gson().fromJson(readJsonData_Api_Count, listType_api_count);
 
-        if (api_count_list==null){
+        if (true){
             api_count_list=new ArrayList<>();
             api_count_list.add(0,new ApiCount(500,500,500,500));
+            api_count_list.set(0,new ApiCount(500,500,500,500));
+
         }
 
 
@@ -179,8 +185,11 @@ public abstract class SimpleFragment extends Fragment {
 
             if (i==1){
                 entries1.add(new PieEntry((float) ((api_count_list.get(0).getApi_count_fail_1()/2000)*360), "Api " + (i+1)));
-            }else{
+            }else if(i==0){
                 entries1.add(new PieEntry((float) ((api_count_list.get(0).getApi_count_fail_2()/2000)*360), "Api " + (i+1)));
+            }else {
+                entries1.add(new PieEntry((float) (((2000-(api_count_list.get(0).getApi_count_fail_1()+api_count_list.get(0).getApi_count_fail_2()))/2000)*360), "Api " + (i+1)));
+
             }
         }
 
