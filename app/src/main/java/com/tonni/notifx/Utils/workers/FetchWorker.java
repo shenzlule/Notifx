@@ -285,7 +285,7 @@ public class FetchWorker extends Worker {
                                                                 int pending_tracker_pending=pendingList.get(j).getChainlist().size();
                                                                 for (int k = 0; k < pendingList.get(j).getChainlist().size(); k++) {
                                                                     for (int l = 0; l < pendingList.size(); l++) {
-                                                                        if (pendingList.get(l).getId()==pendingList.get(k).getId()){
+                                                                        if (pendingList.get(l).getId()==pendingList.get(j).getChainlist().get(k)){
                                                                             pendingList_copy.get(l).setIs_chain_Pending(0);
                                                                             break;
                                                                         }
@@ -343,7 +343,7 @@ public class FetchWorker extends Worker {
                                                                 int pending_tracker_pending=pendingList.get(j).getChainlist().size();
                                                                 for (int k = 0; k < pendingList.get(j).getChainlist().size(); k++) {
                                                                     for (int l = 0; l < pendingList.size(); l++) {
-                                                                        if (pendingList.get(l).getId()==pendingList.get(k).getId()){
+                                                                        if (pendingList.get(l).getId()==pendingList.get(j).getChainlist().get(k)){
                                                                             pendingList_copy.get(l).setIs_chain_Pending(0);
                                                                             break;
                                                                         }
@@ -425,7 +425,7 @@ public class FetchWorker extends Worker {
                                                                 int pending_tracker_pending=pendingList.get(j).getChainlist().size();
                                                                 for (int k = 0; k < pendingList.get(j).getChainlist().size(); k++) {
                                                                     for (int l = 0; l < pendingList.size(); l++) {
-                                                                        if (pendingList.get(l).getId()==pendingList.get(k).getId()){
+                                                                        if (pendingList.get(l).getId()==pendingList.get(j).getChainlist().get(k)){
                                                                             pendingList_copy.get(l).setIs_chain_Pending(0);
                                                                             break;
                                                                         }
@@ -483,7 +483,7 @@ public class FetchWorker extends Worker {
                                                                 int pending_tracker_pending=pendingList.get(j).getChainlist().size();
                                                                 for (int k = 0; k < pendingList.get(j).getChainlist().size(); k++) {
                                                                     for (int l = 0; l < pendingList.size(); l++) {
-                                                                        if (pendingList.get(l).getId()==pendingList.get(k).getId()){
+                                                                        if (pendingList.get(l).getId()==pendingList.get(j).getChainlist().get(k)){
                                                                             pendingList_copy.get(l).setIs_chain_Pending(0);
                                                                             break;
                                                                         }
