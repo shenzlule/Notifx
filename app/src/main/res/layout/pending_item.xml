@@ -111,5 +111,27 @@
 
     </RelativeLayout>
 
+    <LinearLayout
+        android:id="@+id/add_chain_pending"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_below="@id/foreground_layout"
+        android:gravity="center"
+        android:layout_height="32dp">
+
+
+        <ImageView
+            android:layout_marginHorizontal="6dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_baseline_link_24"
+
+            android:id="@+id/btnChainPending"/>
+
+    </LinearLayout>
+
+
+
 
 </RelativeLayout>

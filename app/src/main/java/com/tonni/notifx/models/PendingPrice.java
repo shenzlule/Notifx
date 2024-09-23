@@ -1,6 +1,11 @@
 package com.tonni.notifx.models;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+
 public class PendingPrice {
+
+    private  long id;
     private  String price;
     private  String pair;
     private  String pair_visible;
@@ -10,8 +15,12 @@ public class PendingPrice {
     private   String date_filled;
     private   String direction;
     private   int posFromCurrency;
+    private   int isChainActive;
+    private ArrayList<Long> chainlist;
+    private  int is_chain_Pending;
 
     public PendingPrice(String price, String pair, String pair_visible, String date, String note, String filled, String date_filled, String direction, int posFromCurrency) {
+        this.id= System.currentTimeMillis();
         this.price = price;
         this.pair = pair;
         this.pair_visible = pair_visible;
@@ -21,6 +30,17 @@ public class PendingPrice {
         this.date_filled = date_filled;
         this.direction = direction;
         this.posFromCurrency = posFromCurrency;
+        this.isChainActive = 0;
+        this.chainlist = null;
+        this.is_chain_Pending=0;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getPrice() {
@@ -94,5 +114,30 @@ public class PendingPrice {
 
     public void setPosFromCurrency(int posFromCurrency) {
         this.posFromCurrency = posFromCurrency;
+    }
+
+
+    public int getIsChainActive() {
+        return isChainActive;
+    }
+
+    public void setIsChainActive(int isChainActive) {
+        this.isChainActive = isChainActive;
+    }
+
+    public ArrayList<Long> getChainlist() {
+        return chainlist;
+    }
+
+    public void setChainlist(ArrayList<Long> chainlist) {
+        this.chainlist = chainlist;
+    }
+
+    public int getIs_chain_Pending() {
+        return is_chain_Pending;
+    }
+
+    public void setIs_chain_Pending(int is_chain_Pending) {
+        this.is_chain_Pending = is_chain_Pending;
     }
 }

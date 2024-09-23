@@ -115,49 +115,51 @@ public abstract class SimpleFragment extends Fragment {
      */
     protected PieData generatePieData() {
 
-        int count = 3;
+        int count = 3; // Number of slices in the pie chart
+        ArrayList<PieEntry> entries = new ArrayList<>(); // Holds the Pie chart entries
 
-        ArrayList<PieEntry> entries1 = new ArrayList<>();
-
-        entries1.clear();
-
+        // Read API count data from JSON file
         String readJsonData_Api_Count = StorageUtils.readJsonFromFile(context, FILE_NAME_API_COUNT);
-
-        Type listType_api_count = new TypeToken<List<ApiCount>>() {
-        }.getType();
+        Type listType_api_count = new TypeToken<List<ApiCount>>() {}.getType();
         ArrayList<ApiCount> api_count_list = new Gson().fromJson(readJsonData_Api_Count, listType_api_count);
 
-        if (true){
-            api_count_list=new ArrayList<>();
-            api_count_list.add(0,new ApiCount(500,500,500,500));
-            api_count_list.set(0,new ApiCount(500,500,500,500));
-
-
+//        api_count_list=null;
+        // Fallback in case there's no data
+        if (api_count_list == null || api_count_list.isEmpty()) {
+            api_count_list = new ArrayList<>();
+            api_count_list.add(new ApiCount(500, 500, 500, 500)); // Add default values if no data found
         }
 
+        // Loop through and populate entries for the Pie chart
+        for (int i = 0; i < count; i++) {
+            ApiCount apiCount = api_count_list.get(0); // Assuming we're using the first entry
 
-        for(int i = 0; i < count; i++) {
-
-            if (i==1){
-                entries1.add(new PieEntry((float) ((api_count_list.get(0).getApi_count_success_1()/2000)*360), "Api " + (i+1)));
-            }else if(i==0) {
-                entries1.add(new PieEntry((float) ((api_count_list.get(0).getApi_count_success_2()/2000)*360), "Api " + (i+1)));
-            }else {
-                entries1.add(new PieEntry((float) (((2000-(api_count_list.get(0).getApi_count_success_1()+api_count_list.get(0).getApi_count_success_2()))/2000)*360), "Api " + (i+1)));
+            // Calculate the percentage of each API success
+            if (i == 0) {
+                entries.add(new PieEntry((float) (apiCount.getApi_count_success_1() / 2000.0 * 360), "API 1"));
+            } else if (i == 1) {
+                entries.add(new PieEntry((float) (apiCount.getApi_count_success_2() / 2000.0 * 360), "API 2"));
+            } else {
+                // Calculate the remaining count for other APIs (or failures)
+                float remaining = 2000 - (apiCount.getApi_count_success_1() + apiCount.getApi_count_success_2());
+                entries.add(new PieEntry((float) (remaining / 2000.0 * 360), "Other APIs"));
             }
         }
 
-        PieDataSet ds1 = new PieDataSet(entries1, "Stats");
-        ds1.setColors(ColorTemplate.MATERIAL_COLORS);
-        ds1.setSliceSpace(2f);
-        ds1.setValueTextColor(Color.BLACK);
-        ds1.setValueTextSize(12f);
+        // Create PieDataSet and configure the appearance
+        PieDataSet dataSet = new PieDataSet(entries, "API Stats");
+        dataSet.setColors(ColorTemplate.MATERIAL_COLORS); // Use predefined color templates
+        dataSet.setSliceSpace(2f); // Space between slices
+        dataSet.setValueTextColor(Color.BLACK); // Text color inside pie chart
+        dataSet.setValueTextSize(12f); // Size of the value labels
 
-        PieData d = new PieData(ds1);
-        d.setValueTypeface(tf);
+        // Create the PieData object
+        PieData data = new PieData(dataSet);
+        data.setValueTypeface(tf); // Assuming 'tf' is a custom Typeface
 
-        return d;
+        return data;
     }
+
 
     protected PieData generatePieData_fails() {
 

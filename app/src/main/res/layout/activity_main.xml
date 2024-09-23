@@ -28,7 +28,7 @@
                 android:textStyle="bold"/>
             <ImageView
                 android:layout_marginHorizontal="6dp"
-                android:layout_alignParentEnd="true"
+                android:layout_toLeftOf="@id/l1"
                 android:layout_centerVertical="true"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
@@ -43,7 +43,7 @@
                 android:layout_height="25dp"
                 android:layout_marginRight="10dp"
                 android:visibility="gone"
-                android:layout_alignParentEnd="true"
+                android:layout_toLeftOf="@id/l1"
                 android:layout_centerVertical="true"/>
             <ImageView
                 android:layout_marginHorizontal="6dp"
@@ -54,6 +54,33 @@
                 android:src="@drawable/ic_baseline_file_open_24"
 
                 android:id="@+id/btnOpenFolder"/>
+
+
+            <LinearLayout
+                android:id="@+id/l1"
+                android:layout_width="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:gravity="center"
+                android:layout_height="match_parent">
+                <ImageView
+                    android:layout_marginHorizontal="6dp"
+                    android:layout_toLeftOf="@+id/btnSaveJson"
+                    android:layout_centerVertical="true"
+                    android:visibility="gone"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:src="@drawable/ic_baseline_notifications_active_24"
+                    android:id="@+id/notiActive"/>
+
+                <ImageView
+                    android:layout_marginHorizontal="6dp"
+                    android:layout_toLeftOf="@+id/btnSaveJson"
+                    android:layout_centerVertical="true"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:src="@drawable/ic_baseline_notifications_24"
+                    android:id="@+id/noti_not_Active"/>
+            </LinearLayout>
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 

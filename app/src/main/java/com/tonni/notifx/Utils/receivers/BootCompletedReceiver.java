@@ -42,6 +42,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             Log.d("BootCompletedReceiver", "LOCK BOOT COMPLETED BOOT COMPLETED BOOT COMPLETED BOOT COMPLETED BOOT COMPLETED");
             sendNotification(context);
             setNews();
+            setDailyAlarm();
         }
     }
 
@@ -320,5 +321,34 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         } else {
             Log.d("Boot Notifx", "AlarmManager is null");
         }
+    }
+
+
+    private void setDailyAlarm() {
+        // Get AlarmManager instance
+        AlarmManager alarmManager = (AlarmManager)  context.getSystemService(Context.ALARM_SERVICE);
+
+        // Create an Intent to broadcast when the alarm goes off
+        Intent intent = new Intent(context, NewDayReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Set the time for the alarm (00:01 every day)
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 1);
+        calendar.set(Calendar.SECOND, 0);
+
+        // Ensure the alarm triggers at the correct time if it’s already past today’s time
+        if (calendar.getTimeInMillis() < System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        // Set a repeating alarm that triggers every 24 hours
+        alarmManager.setRepeating(
+                AlarmManager.RTC_WAKEUP,  // Wake the device to trigger the alarm
+                calendar.getTimeInMillis(),
+                AlarmManager.INTERVAL_DAY, // Repeat every day
+                pendingIntent
+        );
     }
 }

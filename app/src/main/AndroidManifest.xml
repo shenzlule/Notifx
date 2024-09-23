@@ -61,6 +61,7 @@
         <receiver android:name=".Utils.receivers.NotifyReceiver" />
         <receiver android:name=".Utils.receivers.ReminderReceiver" />
         <receiver android:name=".Utils.receivers.AlertReceiver" />
+        <receiver android:name=".Utils.receivers.NewDayReceiver" />
         <receiver android:name=".Utils.receivers.NotificationActionReceiver" />
 
 

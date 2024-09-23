@@ -1,11 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:background="@color/black"
     android:layout_height="match_parent">
 
+
+    <LinearLayout
+        android:layout_marginTop="5dp"
+        android:layout_width="match_parent"
+        android:layout_alignParentTop="true"
+        android:id="@+id/l1"
+        android:background="@color/black"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_height="35dp">
+        <RelativeLayout
+            android:id="@+id/textViewAll_filled"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@+id/status"
+            android:background="@drawable/border_active"
+            android:padding="0dp"
+            android:layout_marginHorizontal="2dp"
+            android:layout_centerVertical="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="All"
+                android:textColor="@color/poppy"
+                android:textSize="15sp"
+                android:textStyle="normal" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:id="@+id/textViewToday"
+
+            android:layout_marginHorizontal="2dp"
+            android:padding="0dp"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Today"
+                android:textColor="@color/poppy"
+                android:textSize="15sp"
+                android:textStyle="normal" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="75dp"
+            android:layout_height="match_parent"
+            android:id="@+id/textViewYesterday"
+
+            android:layout_toRightOf="@+id/status"
+            android:layout_marginHorizontal="2dp"
+            android:padding="0dp"
+            android:layout_centerVertical="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Yesterday"
+                android:textColor="@color/poppy"
+                android:textSize="15sp"
+                android:textStyle="normal" />
+
+        </RelativeLayout>
+
+
+
+    </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_marginTop="10dp"
+        android:layout_below="@id/l1"
+        android:layout_marginTop="5dp"
         android:id="@+id/recycler_view_filled"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-</FrameLayout>
+</RelativeLayout>

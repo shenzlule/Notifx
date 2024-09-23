@@ -19,10 +19,11 @@ import com.tonni.notifx.inter.MainActivityInterface;
 import com.tonni.notifx.inter.PendingInterface;
 import com.tonni.notifx.adapter.Watch_list_Adapter;
 import com.tonni.notifx.inter.RefreshableFragment;
+import com.tonni.notifx.models.ForexCurrency;
 import com.tonni.notifx.models.PendingPrice;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Currency;
+import java.util.Calendar;
 import java.util.List;
 
 public class WatchFragment extends Fragment implements RefreshableFragment, PendingInterface {
@@ -32,7 +33,9 @@ public class WatchFragment extends Fragment implements RefreshableFragment, Pend
     private Watch_list_Adapter pendingAdapter;
     private static final String FILE_NAME_PENDING = "pending.json";
     private ArrayList<PendingPrice> pendingPrices = new ArrayList<>();
-    private static final String FILE_NAME_PENDING_LOCAL = "pending_pending.json";
+    private static final String FILE_NAME_PENDING_LOCAL = "pending.json";
+    private static final String FILE_NAME_CURRENCIES_LOCAL = "currencies.json";
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -69,9 +72,49 @@ public class WatchFragment extends Fragment implements RefreshableFragment, Pend
         int realPosOfCurrency=pendingPrices.get(pos).getPosFromCurrency();
         pendingPrices.remove(pos);
         pendingAdapter.notifyItemRemoved(pos);
+
         //update forex fragment
-        mainActivityInterface.UpdateForexMainActivity().refreshUIFromPending(pos,realPosOfCurrency);
-        saved_files();
+        try {
+            mainActivityInterface.UpdateForexMainActivity().refreshUIFromPending_remove(pos,realPosOfCurrency);
+        }catch (Exception e){
+            save_file_forex_currencies(realPosOfCurrency);
+        }
+        save_files();
+    }
+
+    public void add_chain_to_master(int pos){
+        int realPosOfCurrency=pendingPrices.get(pos).getPosFromCurrency();
+
+
+        mainActivityInterface.UpdateForexMainActivity().refreshUIFromPending_add(pos,realPosOfCurrency,pos);
+    }
+
+    private void save_file_forex_currencies(int real_currency_pos) {
+        // Load  items from JSON
+        String readJsonData2 = StorageUtils.readJsonFromFile(getContext(), FILE_NAME_CURRENCIES_LOCAL);
+        Log.d("CURRENCIES_FOREX_LOCAL",readJsonData2 );
+
+
+        // Parse JSON data
+        Type listType1 = new TypeToken<List<ForexCurrency>>() {}.getType();
+        ArrayList<ForexCurrency> currencies=new Gson().fromJson(readJsonData2, listType1);
+
+        //Set the int
+        ForexCurrency forexCurrency = currencies.get(real_currency_pos);
+        forexCurrency.setAlertNumber( forexCurrency.getAlertNumber()-1);
+        currencies.set(real_currency_pos,forexCurrency);
+
+        //save new file
+
+        // save to local
+        Gson gson = new Gson();
+        String jsonData = gson.toJson(currencies);
+        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_CURRENCIES_LOCAL, jsonData);
+
+
+
+
+
     }
 
 
@@ -94,23 +137,43 @@ public class WatchFragment extends Fragment implements RefreshableFragment, Pend
         //        TODO To remove up
 //        pendingAdapter.notifyItemInserted(pos);
         pendingAdapter.notifyDataSetChanged();
-        saved_file();
+        save_file();
     }
 
+    @Override
+    public void addLongIdToMaster(int master_pos, long id) {
+        ArrayList<Long> temp_list=pendingPrices.get(master_pos).getChainlist();
+
+
+        if (temp_list==null){
+            temp_list=new ArrayList<Long>();
+            temp_list.add(id);
+        }else {
+            temp_list.add(id);
+        }
+
+        pendingPrices.get(master_pos).setChainlist(temp_list);
+        pendingPrices.get(master_pos).setIsChainActive(1);
+    }
 
 
     public boolean getLocalFile(ArrayList<PendingPrice> pendingPricesForex){
         // Load  items from JSON
         String readJsonData1 = StorageUtils.readJsonFromFile(getContext(), FILE_NAME_PENDING_LOCAL);
+        Log.d("WATCH-DATA-CHG", readJsonData1);
         // Parse JSON data
         Type listType2 = new TypeToken<List<PendingPrice>>() {}.getType();
         ArrayList<PendingPrice> pendingPrices_=new Gson().fromJson(readJsonData1, listType2);
 
-
+//
+//        for (int i = 0; i < pendingPrices_.size(); i++) {
+//            pendingPrices_.get(i).setIs_chain_Pending(0);
+//        }
 
         if(pendingPrices_==null){
             pendingPrices_=new ArrayList<PendingPrice>();
             pendingPricesForex=new ArrayList<>();
+            save_files();
         }
 
         pendingPricesForex.addAll(pendingPrices_);
@@ -139,6 +202,9 @@ public class WatchFragment extends Fragment implements RefreshableFragment, Pend
 
 
 
+
+
+
         if(pendingPrices_==null){
             pendingPrices_=new ArrayList<PendingPrice>();
         }
@@ -149,7 +215,7 @@ public class WatchFragment extends Fragment implements RefreshableFragment, Pend
 
     }
 
-    public  void saved_file(){
+    public  void save_file(){
         Gson gson = new Gson();
         //CLEAR
         ArrayList<PendingPrice> clear_list=new ArrayList<>();
@@ -163,20 +229,21 @@ public class WatchFragment extends Fragment implements RefreshableFragment, Pend
     }
 
 
-    public  void saved_files(){
+    public  void save_files(){
         Gson gson = new Gson();
         //CLEAR
         ArrayList<PendingPrice> clear_list=new ArrayList<>();
         String jsonData_ = gson.toJson(clear_list);
-        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData_);
+//        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData_);
         StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING, jsonData_);
 
         // SAVE DATA
         String jsonData = gson.toJson(pendingPrices);
         StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING, jsonData);
-        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData);
+//        StorageUtils.writeJsonToFile(getContext(), FILE_NAME_PENDING_LOCAL, jsonData);
 
     }
+
 
 
 }

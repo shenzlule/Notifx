@@ -23,7 +23,7 @@ public class ForexCurrencyAdapter extends RecyclerView.Adapter<ForexCurrencyAdap
     private ForexFragment forexFragment;
     List<PendingPrice> pendingPrices;
 
-    public ForexCurrencyAdapter(List<ForexCurrency> forexCurrencyList, ForexFragment forexFragment, List<PendingPrice> pendingPrices) {
+    public ForexCurrencyAdapter(List<ForexCurrency> forexCurrencyList, ForexFragment forexFragment) {
         this.forexCurrencyList = forexCurrencyList;
         this.forexFragment = forexFragment;
         this.pendingPrices = pendingPrices;

@@ -54,7 +54,7 @@ public class FetchWorker extends Worker {
     private static final String FILE_NAME_TURN = "turnApi.json";
     private static final String FILE_NAME_FILLED_LOCAL = "filled.json";
     private static final String FILE_NAME_PENDING_FOREX_LOCAL = "pending_forex.json";
-    private static final String FILE_NAME_PENDING_LOCAL = "pending_pending.json";
+    private static final String FILE_NAME_PENDING_LOCAL = "pending.json";
     private static final String FILE_NAME_NOTIFICATION = "notification.json";
     private static final String FILE_NAME_CURRENCIES_LOCAL = "currencies.json";
     private static final String FILE_NAME_API_COUNT = "api_count.json";
@@ -194,6 +194,7 @@ public class FetchWorker extends Worker {
 
                 List<ApiTurn> finalTurnList = turnList;
                 ArrayList<PendingPrice> finalFilled_list = filled_list;
+//                finalFilled_list.clear();
                 ArrayList<NotifWatchlistModel> finalNotifcation_list = notifcation_list;
                 List<ApiTurn> finalTurnList1 = turnList;
                 ArrayList<ApiCount> finalApi_count_list = api_count_list;
@@ -274,15 +275,29 @@ public class FetchWorker extends Worker {
                                                 double price_ = Double.parseDouble(String.valueOf((pendingList.get(j).getPrice())));
 
 
-                                                if (pendingList.get(j).getDirection().equals("above")) {
+                                                if (pendingList.get(j).getDirection().equals("above") && pendingList.get(j).getIs_chain_Pending() !=1 ) {
                                                     if (price > price_) {
                                                         pendingList_copy.get(j).setFilled("Yes");
                                                         pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
 
-                                                        int prevAlertNumber=currencies.get(pendingList_copy.get(j).getPosFromCurrency()).getAlertNumber();
-                                                        currencies.get(pendingList_copy.get(j).getPosFromCurrency()).setAlertNumber(prevAlertNumber-1);
+                                                        if(pendingList.get(j).getIsChainActive()==1){
+                                                            if(pendingList.get(j).getChainlist() != null){
+                                                                int pending_tracker_pending=pendingList.get(j).getChainlist().size();
+                                                                for (int k = 0; k < pendingList.get(j).getChainlist().size(); k++) {
+                                                                    for (int l = 0; l < pendingList.size(); l++) {
+                                                                        if (pendingList.get(l).getId()==pendingList.get(k).getId()){
+                                                                            pendingList_copy.get(l).setIs_chain_Pending(0);
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
 
-                                                        finalFilled_list.add(pendingList_copy.get(j));
+                                                        int prevAlertNumber=currencies.get(pendingList_copy.get(j).getPosFromCurrency()).getAlertNumber();
+                                                        currencies_copy.get(pendingList_copy.get(j).getPosFromCurrency()).setAlertNumber(prevAlertNumber-1);
+
+                                                        finalFilled_list.add(0,pendingList_copy.get(j));
                                                         Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
 
                                                         // Create an intent for the stop button
@@ -318,13 +333,29 @@ public class FetchWorker extends Worker {
                                                         // Display the response using Log
                                                         Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                     }
-                                                } else if (pendingList.get(j).getDirection().equals("below")) {
+                                                } else if (pendingList.get(j).getDirection().equals("below") && pendingList.get(j).getIs_chain_Pending() !=1 ) {
                                                     if (price < price_) {
                                                         pendingList_copy.get(j).setFilled("Yes");
                                                         pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+
+                                                        if(pendingList.get(j).getIsChainActive()==1){
+                                                            if(pendingList.get(j).getChainlist() != null){
+                                                                int pending_tracker_pending=pendingList.get(j).getChainlist().size();
+                                                                for (int k = 0; k < pendingList.get(j).getChainlist().size(); k++) {
+                                                                    for (int l = 0; l < pendingList.size(); l++) {
+                                                                        if (pendingList.get(l).getId()==pendingList.get(k).getId()){
+                                                                            pendingList_copy.get(l).setIs_chain_Pending(0);
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+
+
                                                         int prevAlertNumber=currencies.get(pendingList_copy.get(j).getPosFromCurrency()).getAlertNumber();
-                                                        currencies.get(pendingList_copy.get(j).getPosFromCurrency()).setAlertNumber(prevAlertNumber-1);
-                                                        finalFilled_list.add(pendingList_copy.get(j));
+                                                        currencies_copy.get(pendingList_copy.get(j).getPosFromCurrency()).setAlertNumber(prevAlertNumber-1);
+                                                        finalFilled_list.add(0,pendingList_copy.get(j));
                                                         Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
 
                                                         // Create an intent for the stop button
@@ -384,13 +415,29 @@ public class FetchWorker extends Worker {
                                                 double price_ = Double.parseDouble(String.valueOf((pendingList.get(j).getPrice())));
 
 
-                                                if (pendingList.get(j).getDirection().equals("above")) {
+                                                if (pendingList.get(j).getDirection().equals("above")  && pendingList.get(j).getIs_chain_Pending() !=1 ) {
                                                     if (price > price_) {
                                                         pendingList_copy.get(j).setFilled("Yes");
                                                         pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+
+                                                        if(pendingList.get(j).getIsChainActive()==1){
+                                                            if(pendingList.get(j).getChainlist() != null){
+                                                                int pending_tracker_pending=pendingList.get(j).getChainlist().size();
+                                                                for (int k = 0; k < pendingList.get(j).getChainlist().size(); k++) {
+                                                                    for (int l = 0; l < pendingList.size(); l++) {
+                                                                        if (pendingList.get(l).getId()==pendingList.get(k).getId()){
+                                                                            pendingList_copy.get(l).setIs_chain_Pending(0);
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+
+
                                                         int prevAlertNumber=currencies.get(pendingList_copy.get(j).getPosFromCurrency()).getAlertNumber();
-                                                        currencies.get(pendingList_copy.get(j).getPosFromCurrency()).setAlertNumber(prevAlertNumber-1);
-                                                        finalFilled_list.add(pendingList_copy.get(j));
+                                                        currencies_copy.get(pendingList_copy.get(j).getPosFromCurrency()).setAlertNumber(prevAlertNumber-1);
+                                                        finalFilled_list.add(0,pendingList_copy.get(j));
                                                         Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
                                                         int id_=count_notification[0]++;
                                                         Log.d("MainActivity-WATCH", String.valueOf(id_));
@@ -426,13 +473,29 @@ public class FetchWorker extends Worker {
                                                         // Display the response using Log
                                                         Log.d("MainActivity-Api-worker", apiResponse.toString());
                                                     }
-                                                } else if (pendingList.get(j).getDirection().equals("below")) {
+                                                } else if (pendingList.get(j).getDirection().equals("below") && pendingList.get(j).getIs_chain_Pending() !=1 ) {
                                                     if (price < price_) {
                                                         pendingList_copy.get(j).setFilled("Yes");
                                                         pendingList_copy.get(j).setDate_filled(String.valueOf(calendar.getTimeInMillis()));
+
+                                                        if(pendingList.get(j).getIsChainActive()==1){
+                                                            if(pendingList.get(j).getChainlist() != null){
+                                                                int pending_tracker_pending=pendingList.get(j).getChainlist().size();
+                                                                for (int k = 0; k < pendingList.get(j).getChainlist().size(); k++) {
+                                                                    for (int l = 0; l < pendingList.size(); l++) {
+                                                                        if (pendingList.get(l).getId()==pendingList.get(k).getId()){
+                                                                            pendingList_copy.get(l).setIs_chain_Pending(0);
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+
+
                                                         int prevAlertNumber=currencies.get(pendingList_copy.get(j).getPosFromCurrency()).getAlertNumber();
-                                                        currencies.get(pendingList_copy.get(j).getPosFromCurrency()).setAlertNumber(prevAlertNumber-1);
-                                                        finalFilled_list.add(pendingList_copy.get(j));
+                                                        currencies_copy.get(pendingList_copy.get(j).getPosFromCurrency()).setAlertNumber(prevAlertNumber-1);
+                                                        finalFilled_list.add(0,pendingList_copy.get(j));
                                                         Log.d("MainActivity-Watch_list", pendingList.get(j).getPair());
 
                                                         // Create an intent for the stop button
@@ -502,6 +565,18 @@ public class FetchWorker extends Worker {
                             String jsonData_notification_list = gson.toJson(finalNotifcation_list);
                             StorageUtils.writeJsonToFile(context, FILE_NAME_TURN, jsonData_turn_list);
                             StorageUtils.writeJsonToFile(context, FILE_NAME_NOTIFICATION, jsonData_notification_list);
+
+
+//                            ArrayList<PendingPrice> temFinalFilled=new ArrayList<>();
+//                            for (int i = 0; i < finalFilled_list.size(); i++) {
+//                                temFinalFilled.add(0,finalFilled_list.get());
+//                            }
+
+
+//                            finalFilled_list.clear();
+//                            finalFilled_list.addAll(temFinalFilled);
+
+
                             String jsonData_filled_list = gson.toJson(finalFilled_list);
                             StorageUtils.writeJsonToFile(context, FILE_NAME_FILLED_LOCAL, jsonData_filled_list);
                             saved_file_currencies(context,currencies_copy);
